@@ -1,7 +1,7 @@
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-public class StateManager : MonoBehaviour
+public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
 {
     [Header("Adjustable Variables")]
     [SerializeField] float groundDrag;
@@ -39,7 +39,7 @@ public class StateManager : MonoBehaviour
     public bool grinding;
     public bool inAir;
 
-    public MovementState state;
+    public MovementState state;  // # remove
 
     public enum MovementState
     {
@@ -88,6 +88,11 @@ public class StateManager : MonoBehaviour
         pc = cam.GetComponent<PlayerCam>();
     }
 
+    private void Awake()
+    {
+        CurrentState = States[MovementState.freeze];
+    }
+
     private void Update()
     {
         StateMachine();
@@ -104,7 +109,7 @@ public class StateManager : MonoBehaviour
         //mode to freeze
         if (freeze)
         {
-            state = MovementState.freeze;
+            state = MovementState.freeze; // ##
             rb.linearVelocity = Vector3.zero;
             pm.moveSpeed = 0;
             pc.fwdLocked = true;
