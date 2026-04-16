@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MoveCamera : MonoBehaviour
 {
-    public StateManager sm;
+    public PlayerStateMachine sm;
     public Transform cameraPosition;
     public Transform PlayerTransform;
     public float cameraForwardDis;
@@ -14,7 +14,7 @@ public class MoveCamera : MonoBehaviour
     void Update()
     {
         Vector3 desiPos;
-        if (sm.state == StateManager.MovementState.rolling)
+        if (sm.state == PlayerStateMachine.EMovementState.rolling)
             desiPos = cameraPosition.position * rollRatio + PlayerTransform.position * (1 - rollRatio);
         else
             desiPos = cameraPosition.position;

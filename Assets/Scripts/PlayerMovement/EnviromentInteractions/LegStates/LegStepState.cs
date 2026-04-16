@@ -1,0 +1,22 @@
+using UnityEngine;
+
+using thisEState = EnviromentInteractionStateMachine.EEnviromentInteractionState; // shorthand
+
+public class LegStepState : EnviromentInteractionState
+{
+    public LegStepState(EnviromentInteractionContext context, thisEState estate) : base(context, estate)
+    {
+        EnviromentInteractionContext Context = context;
+    }
+
+    public override void EnterState(){}
+    public override void ExitState(){}
+    public override void UpdateState(){}
+    public override thisEState GetNextState()
+    {
+        return StateKey;
+    }
+    public override void OnTriggerEnter(Collider other){}
+    public override void OnTriggerStay(Collider other){}
+    public override void OnTriggerExit(Collider other){}
+}

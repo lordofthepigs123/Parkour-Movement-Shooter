@@ -19,7 +19,7 @@ public class HeatDash : MonoBehaviour
     [SerializeField] Transform orientation;
     [SerializeField] Transform cam;
 
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private HeatHandler hh;
     private InputHandler ih;
     private Rigidbody rb;
@@ -27,7 +27,7 @@ public class HeatDash : MonoBehaviour
     private SlideRoll sr;
     private void Awake()
     {
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         hh = GetComponent<HeatHandler>();
         ih = GetComponent<InputHandler>();
         rb = GetComponent<Rigidbody>();

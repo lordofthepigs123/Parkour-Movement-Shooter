@@ -9,7 +9,7 @@ public class GrabHandler : Attacher
     [Header("Components")]
     [SerializeField] GrabEdgeDetector geFeet;
     [SerializeField] GrabEdgeDetector geCam;
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private PlayerColliderManager cm;
     private PlayerMovement pm;
 
@@ -27,7 +27,7 @@ public class GrabHandler : Attacher
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         ih = GetComponent<InputHandler>();
         cm = GetComponent<PlayerColliderManager>();
         pm = GetComponent<PlayerMovement>();

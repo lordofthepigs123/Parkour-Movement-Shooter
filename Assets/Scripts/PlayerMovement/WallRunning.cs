@@ -96,7 +96,7 @@ public class WallRunning : MonoBehaviour
     private Collider lastWall;
 
     private PlayerStats ps;
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private Rigidbody rb;
     private Wedge wedge;
     private InputHandler ih;
@@ -121,7 +121,7 @@ public class WallRunning : MonoBehaviour
     {
         ps = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         wedge = GetComponent<Wedge>();
         ih = GetComponent<InputHandler>();
         cm = GetComponent<PlayerColliderManager>();

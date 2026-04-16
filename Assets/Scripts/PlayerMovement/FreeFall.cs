@@ -61,7 +61,7 @@ public class FreeFall : PhysicsBody
 
 
     [Header("Components")]
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private PlayerColliderManager cm;
     private PlayerCam pc;
     private SlideRoll sr; 
@@ -88,7 +88,7 @@ public class FreeFall : PhysicsBody
     private void Start()
     {
         ih = GetComponent<InputHandler>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         cm = GetComponent<PlayerColliderManager>();
         rb = GetComponent<Rigidbody>();
         pc = cam.GetComponent<PlayerCam>();

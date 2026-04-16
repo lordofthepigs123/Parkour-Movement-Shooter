@@ -24,13 +24,15 @@ public class MainRagdollHandeler : PhysicsBody
     [SerializeField] float deflectionMult;
     public float angularSet;
     private float angularMaxOG;
+    public Vector3 LeftLegNormal;
+    public Vector3 RightLegNormal;
     [HideInInspector] public float angularDif;
 
     [Header("Components")]
     private PlayerMovement pm;
     private WallRunning wr;
     private PlayerGrind pg;
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private PlayerColliderManager cm;
     private HeatHandler hh;
     private void Start()
@@ -40,7 +42,7 @@ public class MainRagdollHandeler : PhysicsBody
         wr = GetComponent<WallRunning>();
         pg = GetComponent<PlayerGrind>();
         ff = GetComponent<FreeFall>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         cm = GetComponent<PlayerColliderManager>();
         ih = GetComponent<InputHandler>();
         hh = GetComponent<HeatHandler>();
@@ -57,17 +59,17 @@ public class MainRagdollHandeler : PhysicsBody
     private void FixedUpdate()
     {
         //
-        if (sm.state == StateManager.MovementState.wedgegrabing)
+        if (sm.state == PlayerStateMachine.EMovementState.wedgegrabing)
         {
 
         }
         //
-        else if (sm.state == StateManager.MovementState.swinging)
+        else if (sm.state == PlayerStateMachine.EMovementState.swinging)
         {
 
         }
         //
-        else if (sm.state == StateManager.MovementState.inhop)
+        else if (sm.state == PlayerStateMachine.EMovementState.inhop)
         {
             //detector needs rework#
             /*
@@ -78,7 +80,7 @@ public class MainRagdollHandeler : PhysicsBody
 
         }
         //
-        else if (sm.state == StateManager.MovementState.grinding)
+        else if (sm.state == PlayerStateMachine.EMovementState.grinding)
         {
             var (tangentSpline, upSpline, leftSpline, worldPos) = pg.getVarsRail(pg.currentRailScript);
             leanForces(tangentSpline, upSpline, leftSpline, worldPos, pg.angMult, pg.mouseDirStr);
@@ -88,7 +90,7 @@ public class MainRagdollHandeler : PhysicsBody
             //frictionAngDeflect() * #
         }
         //
-        else if (sm.state == StateManager.MovementState.accelrail)
+        else if (sm.state == PlayerStateMachine.EMovementState.accelrail)
         {
             var (tangentSpline, upSpline, leftSpline, worldPos) = pg.getVarsRail(pg.currentRailScript);
             leanForces(tangentSpline, upSpline, leftSpline, worldPos, pg.angMult, pg.mouseDirStr);
@@ -98,7 +100,7 @@ public class MainRagdollHandeler : PhysicsBody
             //frictionAngDeflect() * #
         }
         //
-        else if (sm.state == StateManager.MovementState.standingup)
+        else if (sm.state == PlayerStateMachine.EMovementState.standingup)
         {
             angFriction = Mathf.Lerp(sFriction_standUp, friction_standUp, ff.standUpRatio);
             spdMult_ang = Mathf.Lerp(sSpeedMult_standUp, speedMult_standUp, ff.standUpRatio);
@@ -107,7 +109,7 @@ public class MainRagdollHandeler : PhysicsBody
             angularResistance();
         }
         //
-        else if (sm.state == StateManager.MovementState.wallrunningup)
+        else if (sm.state == PlayerStateMachine.EMovementState.wallrunningup)
         {
             spdMult_ang = speedMult_WallRun;
             angFriction = friction_WallRun;
@@ -117,7 +119,7 @@ public class MainRagdollHandeler : PhysicsBody
             angularResistance();
         }
         //
-        else if (sm.state == StateManager.MovementState.wallresistdown)
+        else if (sm.state == PlayerStateMachine.EMovementState.wallresistdown)
         {
             spdMult_ang = speedMult_WallRun;
             angFriction = friction_WallRun;
@@ -127,7 +129,7 @@ public class MainRagdollHandeler : PhysicsBody
             angularResistance();
         }
         //
-        else if (sm.state == StateManager.MovementState.wallrunningdown)
+        else if (sm.state == PlayerStateMachine.EMovementState.wallrunningdown)
         {
             spdMult_ang = speedMult_WallRun;
             angFriction = friction_WallRun;
@@ -139,7 +141,7 @@ public class MainRagdollHandeler : PhysicsBody
             //add camera restrictions#
         }
         //
-        else if (sm.state == StateManager.MovementState.wallrunning)
+        else if (sm.state == PlayerStateMachine.EMovementState.wallrunning)
         {
             spdMult_ang = speedMult_WallRun;
             angFriction = friction_WallRun;
@@ -149,17 +151,17 @@ public class MainRagdollHandeler : PhysicsBody
             angularResistance();
         }
         //
-        else if (sm.state == StateManager.MovementState.rolling)
+        else if (sm.state == PlayerStateMachine.EMovementState.rolling)
         {
 
         }
         //
-        else if (sm.state == StateManager.MovementState.sliding)
+        else if (sm.state == PlayerStateMachine.EMovementState.sliding)
         {
             // possibly frictionAngDeflect() #
         }
         //
-        else if (sm.state == StateManager.MovementState.prone)
+        else if (sm.state == PlayerStateMachine.EMovementState.prone)
         {
             // possibly frictionAngDeflect() #
             spdMult_ang = friction_Prone;
@@ -169,12 +171,12 @@ public class MainRagdollHandeler : PhysicsBody
             angularResistance();
         }
         //
-        else if (sm.state == StateManager.MovementState.freefall)
+        else if (sm.state == PlayerStateMachine.EMovementState.freefall)
         {
 
         }
         //
-        else if (sm.state == StateManager.MovementState.walking)
+        else if (sm.state == PlayerStateMachine.EMovementState.walking)
         {
             spdMult_ang = baseSpdAng;
             angFriction = baseFricAng;
@@ -188,7 +190,7 @@ public class MainRagdollHandeler : PhysicsBody
             angularResistance();
         }
         //
-        else if (sm.state == StateManager.MovementState.air)
+        else if (sm.state == PlayerStateMachine.EMovementState.air)
         {
             spdMult_ang = baseSpdAng;
             angFriction = 0;

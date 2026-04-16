@@ -21,7 +21,7 @@ public class PlayerCam : MonoBehaviour
     [SerializeField] Transform camHolder;
     [SerializeField] RangedHandler rh;
     [SerializeField] Transform cam;
-    [SerializeField] StateManager sm;
+    [SerializeField] PlayerStateMachine sm;
     [SerializeField] InputHandler ih;
     [SerializeField] Rigidbody rb;
 

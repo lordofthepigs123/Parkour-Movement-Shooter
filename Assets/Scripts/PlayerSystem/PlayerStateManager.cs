@@ -1,7 +1,7 @@
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
+public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState>
 {
     [Header("Adjustable Variables")]
     [SerializeField] float groundDrag;
@@ -39,9 +39,9 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
     public bool grinding;
     public bool inAir;
 
-    public MovementState state;  // # remove
+    public EMovementState state;  // # remove
 
-    public enum MovementState
+    public enum EMovementState
     {
         freeze,
         unlimited,
@@ -90,7 +90,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
 
     private void Awake()
     {
-        CurrentState = States[MovementState.freeze];
+        CurrentState = States[EMovementState.freeze];
     }
 
     private void Update()
@@ -109,7 +109,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to freeze
         if (freeze)
         {
-            state = MovementState.freeze; // ##
+            state = EMovementState.freeze; // ##
             rb.linearVelocity = Vector3.zero;
             pm.moveSpeed = 0;
             pc.fwdLocked = true;
@@ -117,12 +117,12 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to unlimited
         else if (unlimited)
         {
-            state = MovementState.unlimited;
+            state = EMovementState.unlimited;
         }
         //mode to Wedge Grabing
         else if (wedgeGrabing)
         {
-            state = MovementState.wedgegrabing;
+            state = EMovementState.wedgegrabing;
             rb.linearDamping = airDrag;
             pm.moveSpeed = 0;
             pc.fwdLocked = true;
@@ -130,14 +130,14 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to Wedge Grabing
         else if (swinging)
         {
-            state = MovementState.swinging;
+            state = EMovementState.swinging;
             rb.linearDamping = airDrag;
             pm.moveSpeed = 0;
             pc.fwdLocked = false;
         }
         else if (inHop)
         {
-            state = MovementState.inhop;
+            state = EMovementState.inhop;
             rb.linearDamping = airDrag;
             pm.moveSpeed = 0;
             pc.fwdLocked = true;
@@ -145,7 +145,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to grinding
         else if (grinding)
         {
-            state = MovementState.grinding;
+            state = EMovementState.grinding;
             rb.linearDamping = grindDrag;
             pm.moveSpeed = 0;
             pc.fwdLocked = true;
@@ -153,7 +153,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to grinding
         else if (accelRail)
         {
-            state = MovementState.accelrail;
+            state = EMovementState.accelrail;
             rb.linearDamping = groundDrag;
             pm.moveSpeed = 0;
             pc.fwdLocked = true;
@@ -161,7 +161,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to Dashing
         else if (dashing)
         {
-            state = MovementState.dashing;
+            state = EMovementState.dashing;
             rb.linearDamping = airDrag;
             pm.moveSpeed = movSpeed;
             pc.fwdLocked = true;
@@ -169,7 +169,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to Wall Running Up
         else if (wallRunningUp)
         {
-            state = MovementState.wallrunningup;
+            state = EMovementState.wallrunningup;
             rb.linearDamping = upRunDrag;
             pm.moveSpeed = vupSpeed;
             pc.fwdLocked = true;
@@ -177,7 +177,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to Wall Running Down
         else if (wallRunningDown)
         {
-            state = MovementState.wallrunningdown;
+            state = EMovementState.wallrunningdown;
             rb.linearDamping = downRunDrag;
             pm.moveSpeed = vdownSpeed;
             pc.fwdLocked = true;
@@ -185,7 +185,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to Wall Resist Down
         else if (wallResistDown)
         {
-            state = MovementState.wallresistdown;
+            state = EMovementState.wallresistdown;
             rb.linearDamping = downRunDrag;
             pm.moveSpeed = vdownSpeed;
             pc.fwdLocked = true;
@@ -193,7 +193,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to Wall Running
         else if (wallRunning)
         {
-            state = MovementState.wallrunning;
+            state = EMovementState.wallrunning;
             rb.linearDamping = wallRunDrag;
             pm.moveSpeed = movSpeed;
             pc.fwdLocked = true;
@@ -201,7 +201,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //Mode to Rolling
         else if (rolling)
         {
-            state = MovementState.rolling;
+            state = EMovementState.rolling;
             rb.linearDamping = groundDrag;
             pm.moveSpeed = movSpeed;
             pc.fwdLocked = true;
@@ -209,7 +209,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //Mode to Slide
         else if (sliding)
         {
-            state = MovementState.sliding;
+            state = EMovementState.sliding;
             if (sr.SlopeAngle() > pm.minSlopeAngle)
             {
                 rb.linearDamping = airDrag;
@@ -225,7 +225,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //mode to standUp
         else if (standingUp && cm.grounded)
         {
-            state = MovementState.standingup;
+            state = EMovementState.standingup;
             float tempPercent = ff.standUpRatio; // lerp mods from prone to walk
             float tempComp = 1 - tempPercent;
             rb.linearDamping = proneDrag * tempComp + groundDrag * tempPercent;
@@ -235,7 +235,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         else if (ih.heldX && cm.grounded)
         {
             //Mode to prone
-            state = MovementState.prone;
+            state = EMovementState.prone;
             rb.linearDamping = proneDrag;
             pm.moveSpeed = proneSpeed;
             pc.fwdLocked = true;
@@ -244,7 +244,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         else if (freeFalling)
         {
             //Mode to freefall
-            state = MovementState.freefall;
+            state = EMovementState.freefall;
             rb.linearDamping = dragFF;
             pm.moveSpeed = movSpeed;
             pc.fwdLocked = false;
@@ -252,7 +252,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //Mode to running
         else if (cm.grounded && !pm.exitingSlope)
         {
-            state = MovementState.walking;
+            state = EMovementState.walking;
             rb.linearDamping = groundDrag;
             pm.moveSpeed = movSpeed;
             pc.fwdLocked = true;
@@ -260,14 +260,14 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
         //Mode to air
         else
         {
-            state = MovementState.air;
+            state = EMovementState.air;
             rb.linearDamping = airDrag;
             pm.moveSpeed = movSpeed;
             inAir = true;
             pc.fwdLocked = true;
         }
 
-        if (state != MovementState.air)
+        if (state != EMovementState.air)
             inAir = false;
     }
 
@@ -280,7 +280,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.MovementState>
 
     private void StateHandler()
     {
-        if (state == MovementState.prone)
+        if (state == EMovementState.prone)
         {
             rb.AddForce(proneStickForce * Vector3.down, ForceMode.Force);//stick to ground force
         }

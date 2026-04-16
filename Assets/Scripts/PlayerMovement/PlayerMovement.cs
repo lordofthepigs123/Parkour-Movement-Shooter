@@ -37,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
     private PlayerStats ps;
     private InputHandler ih;
     private PlayerColliderManager cm;
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private Rigidbody rb;
     [SerializeField] AngleJumpParticleManager aj;
 
@@ -47,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         ih = GetComponent<InputHandler>();
         cm = GetComponent<PlayerColliderManager>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         readyToJump = true;
     }
 

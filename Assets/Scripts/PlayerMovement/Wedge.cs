@@ -38,7 +38,7 @@ public class Wedge : MonoBehaviour
     private float moveTime = 0;
     private bool holdDetecting;
     private Rigidbody rb;
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private PlayerColliderManager cm;
     private RaycastHit Hit;
     private RaycastHit SphereHit;
@@ -52,7 +52,7 @@ public class Wedge : MonoBehaviour
     {
         ps = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         cm = GetComponent<PlayerColliderManager>();
         ih = GetComponent<InputHandler>();
     }

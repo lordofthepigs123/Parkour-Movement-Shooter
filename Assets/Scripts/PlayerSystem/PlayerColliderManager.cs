@@ -28,7 +28,7 @@ public class PlayerColliderManager : MonoBehaviour
     [Header("Components")]
     static private CapsuleCollider ColM;
     static private SphereCollider ColS;
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private Collider[] colliders;//player cols
     [HideInInspector] public Collider wallCollider;//wall col
     public ActiveCol state;
@@ -39,7 +39,7 @@ public class PlayerColliderManager : MonoBehaviour
     }
     private void Start()
     {
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         ColM = GetComponent<CapsuleCollider>();
         ColS = GetComponent<SphereCollider>();
         Collider[] temp = { ColM, ColS };

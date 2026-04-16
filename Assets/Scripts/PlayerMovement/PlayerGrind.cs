@@ -67,7 +67,7 @@ public class PlayerGrind : Attacher
     [Header("Components")]
     public RailScript currentRailScript;// obtained by RailDetectorHandler
     public Collider currentRailCol;// obtained by RailDetectorHandler
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private PlayerColliderManager cm;
     private PlayerMovement pm;
 
@@ -91,7 +91,7 @@ public class PlayerGrind : Attacher
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         ih = GetComponent<InputHandler>();
         cm = GetComponent<PlayerColliderManager>();
         pm = GetComponent<PlayerMovement>();

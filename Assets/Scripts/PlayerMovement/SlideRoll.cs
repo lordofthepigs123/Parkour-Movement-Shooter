@@ -36,7 +36,7 @@ public class SlideRoll : PhysicsBody
     [Header("Components")]
     [SerializeField] ComboCounter cc;
     private PlayerStats ps;
-    private StateManager sm;
+    private PlayerStateMachine sm;
     private PlayerCam pc;
     private PlayerColliderManager cm;
     private PlayerMovement pm;
@@ -56,7 +56,7 @@ public class SlideRoll : PhysicsBody
     {
         ps = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody>();
-        sm = GetComponent<StateManager>();
+        sm = GetComponent<PlayerStateMachine>();
         pc = cam.GetComponent<PlayerCam>();
         ih = GetComponent<InputHandler>();
         ff = GetComponent<FreeFall>();

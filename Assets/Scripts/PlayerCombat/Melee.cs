@@ -14,7 +14,7 @@ public class Melee : MonoBehaviour
 
     public bool active;
 
-    [SerializeField] protected StateManager sm;
+    [SerializeField] protected PlayerStateMachine sm;
     [SerializeField] protected Wedge wedge;
     [SerializeField] protected WallRunning wr;
     [SerializeField] protected PlayerCam cam;
