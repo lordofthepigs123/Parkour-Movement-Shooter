@@ -16,7 +16,16 @@ public class LegSearchState : EnviromentInteractionState
     {
         return StateKey;
     }
-    public override void OnTriggerEnter(Collider other){}
-    public override void OnTriggerStay(Collider other){}
-    public override void OnTriggerExit(Collider other){}
-}
+    public override void OnTriggerEnter(Collider other)
+    {
+        StartIkTargetPositionTracking(other);
+    }
+    public override void OnTriggerStay(Collider other)
+    {
+        UpdateIkTargetPosition(other);
+    }
+    public override void OnTriggerExit(Collider other)
+    {
+        ResetIkTargetPositionTracking(other);
+    }
+} 

@@ -36,7 +36,6 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
     [SerializeField] private float _minStrideDisFWD;
     [SerializeField] private float _strideDisFallVel;
     [SerializeField] private float _strideDisFalloff;
-    
 
     private void Awake()
     {

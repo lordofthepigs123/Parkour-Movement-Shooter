@@ -13,6 +13,8 @@ public class EnviromentInteractionContext : MonoBehaviour
 
     [Header("Specialized state machine control")]
     private Dictionary<EBodySide, TwoBoneIKConstraint> _ikConstraint;
+    private Dictionary<EBodySide, Transform> _legTransform;
+    private Dictionary<EBodySide, Transform> _targetTransform;
     private Rigidbody _rb;
     private Collider _rootCollider;
     private Transform _rootTransform;
@@ -26,11 +28,15 @@ public class EnviromentInteractionContext : MonoBehaviour
     private float _strideDisFalloff;
     private float _legLength;
     private float _maxStepDownDis;
+    private float _placeOffsetDis;
+    private float _resetDur;
+    private float _resetDurMod;
 
     //constructor
     public EnviromentInteractionContext(TwoBoneIKConstraint leftIkConstraint, TwoBoneIKConstraint rightIkConstraint, Rigidbody rb,
      Collider rootCollider, Transform rootTransform, MainRagdollHandeler mr, float maxStrideDisBAC, float minStrideDisBAC,
-      float maxStrideDisFWD, float minStrideDisFWD, float strideDisFallVel, float strideDisFalloff, float legLength, float maxStepDownDis)
+      float maxStrideDisFWD, float minStrideDisFWD, float strideDisFallVel, float strideDisFalloff, float legLength, float maxStepDownDis, float placeOffsetDis
+      , float resetDur, float resetDurMod)
     {
         _rb = rb;
         _rootCollider = rootCollider;
@@ -44,9 +50,16 @@ public class EnviromentInteractionContext : MonoBehaviour
         _strideDisFalloff = strideDisFalloff;
         _legLength = legLength;
         _maxStepDownDis = maxStepDownDis;
+        _placeOffsetDis = placeOffsetDis;
+        _resetDur = resetDur;
+        _resetDurMod = resetDurMod;
 
         _ikConstraint.Add(EBodySide.LEFT, leftIkConstraint);
         _ikConstraint.Add(EBodySide.RIGHT, rightIkConstraint);
+        _legTransform.Add(EBodySide.LEFT, leftIkConstraint.data.root.transform);
+        _legTransform.Add(EBodySide.RIGHT, rightIkConstraint.data.root.transform);
+        _targetTransform.Add(EBodySide.LEFT, leftIkConstraint.data.target.transform);
+        _targetTransform.Add(EBodySide.RIGHT, rightIkConstraint.data.target.transform);
         //MainRagdollHandeler within left/right var setup
         _legNormal.Add(EBodySide.LEFT, mr.LeftLegNormal);
         _legNormal.Add(EBodySide.RIGHT, mr.RightLegNormal);
@@ -54,6 +67,8 @@ public class EnviromentInteractionContext : MonoBehaviour
 
     // Read - only Propertise
     public Dictionary<EBodySide, TwoBoneIKConstraint> IkConstraint => _ikConstraint;
+    public Dictionary<EBodySide, Transform> LegTransform => _legTransform;
+    public Dictionary<EBodySide, Transform> TargetTransform => _targetTransform;
     public Rigidbody Rb => _rb;
     public Collider RootCollider => _rootCollider;
     public Transform RootTransform => _rootTransform;
@@ -67,6 +82,9 @@ public class EnviromentInteractionContext : MonoBehaviour
     public float StrideDisFalloff => _strideDisFalloff;
     public float LegLength => _legLength;
     public float MaxStepDownDis => _maxStepDownDis;
+    public float PlaceOffsetDis => _placeOffsetDis;
+    public float ResetDur => _resetDur;
+    public float ResetDurMod => _resetDurMod;
 
     //Set-able variables
     //public TwoBoneIKConstraint CurrentIkConstraint {get; private set;}

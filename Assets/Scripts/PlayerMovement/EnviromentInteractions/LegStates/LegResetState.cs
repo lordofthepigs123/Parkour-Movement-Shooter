@@ -4,6 +4,7 @@ using thisEState = LegStateMachine.ELegState; // shorthand
 
 public class LegResetState : LegState
 {
+    float _contactTime = 0;
     public LegResetState(LegContext lContext, thisEState estate) : base(lContext, estate)
     {
         LegContext LContext = lContext;
@@ -14,6 +15,8 @@ public class LegResetState : LegState
     public override void UpdateState(){}
     public override thisEState GetNextState()
     {
+        float resetTime = Co.ResetDur * Mathf.Pow(Co.ResetDurMod, Velocity.magnitude); // t / (1+k)^x
+        if (_contactTime >= resetTime)
         return LegStateMachine.ELegState.Search;
         //return StateKey;
     }

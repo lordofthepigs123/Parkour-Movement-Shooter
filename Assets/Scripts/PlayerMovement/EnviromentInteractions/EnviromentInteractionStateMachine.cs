@@ -34,12 +34,14 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private float _strideDisFalloff;
     [SerializeField] private float _legLength;
     [SerializeField] private float _maxStepDownDis;
-    
+    [SerializeField] private float _placeOffsetDis;
+    [SerializeField] private float _resetDur;
+    [SerializeField] private float _resetDurMod;
 
     private void Awake()
     {
         _context = new EnviromentInteractionContext(_leftIkConstraint, _rightIkConstraint, _rb, _rootCollider, transform.root, _mr,
-         _maxStrideDisBAC, _minStrideDisBAC, _maxStrideDisFWD, _minStrideDisFWD, _strideDisFallVel, _strideDisFalloff, _legLength, _maxStepDownDis);
+         _maxStrideDisBAC, _minStrideDisBAC, _maxStrideDisFWD, _minStrideDisFWD, _strideDisFallVel, _strideDisFalloff, _legLength, _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod);
         
         //create new leg state machines and reference their context info
         _leftFootMac = new LegStateMachine(_context, EnviromentInteractionContext.EBodySide.LEFT);
