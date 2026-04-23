@@ -24,8 +24,6 @@ public class MainRagdollHandeler : PhysicsBody
     [SerializeField] float deflectionMult;
     public float angularSet;
     private float angularMaxOG;
-    public Vector3 LeftLegNormal;
-    public Vector3 RightLegNormal;
     [HideInInspector] public float angularDif;
 
     [Header("Components")]

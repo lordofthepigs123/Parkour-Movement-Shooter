@@ -3,10 +3,14 @@ using UnityEngine.Animations.Rigging;
 
 public class LegStateMachine : StateManager<LegStateMachine.ELegState>
 {
-    public LegStateMachine(EnviromentInteractionContext context, EnviromentInteractionContext.EBodySide side)
+    public void Init(EnviromentInteractionContext context, EnviromentInteractionContext.EBodySide side, EnviromentInteractionContext.EBodySide otherSide)
     {
         _context = context;
         _side = side;
+        _otherSide = otherSide;
+
+        LContext = new LegContext(_context, _side, _otherSide); 
+        InitializeStates();
     }
 
     public enum ELegState
@@ -18,36 +22,15 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
 
     private EnviromentInteractionContext _context;
     private EnviromentInteractionContext.EBodySide _side;
+    private EnviromentInteractionContext.EBodySide _otherSide;
     public LegContext LContext;
-
-    [Header("State Machine control")]
-    [SerializeField] private TwoBoneIKConstraint _leftIkConstraint;
-    [SerializeField] private TwoBoneIKConstraint _rightIkConstraint;
-    [SerializeField] private Rigidbody _rb;
-    [SerializeField] private CapsuleCollider _rootCollider;
-    [SerializeField] private BoxCollider _triggerCollider;
-    
-    [Header("Physics Simulation Tweaks")]
-
-    [SerializeField] private MainRagdollHandeler _mr;
-    [SerializeField] private float _maxStrideDisBAC;
-    [SerializeField] private float _minStrideDisBAC;
-    [SerializeField] private float _maxStrideDisFWD;
-    [SerializeField] private float _minStrideDisFWD;
-    [SerializeField] private float _strideDisFallVel;
-    [SerializeField] private float _strideDisFalloff;
-
-    private void Awake()
-    {
-        LContext = new LegContext(_context, _side);
-        InitializeStates();
-    }
 
     private void InitializeStates() // Add States to inherited StateManager dictionary and set initial state
     {
-        //States.Add(EEnviromentInteractionState.Walk, new WalkState(_context, EEnviromentInteractionState.Search)); # 
-        //States.Add(EEnviromentInteractionState.Step, new WalkStepState(_context, EEnviromentInteractionState.Step));
-        //States.Add(EEnviromentInteractionState.Reset, new WalkResetState(_context, EEnviromentInteractionState.Reset));
+        Debug.Log(_side);
+        States.Add(ELegState.Search, new LegSearchState(LContext, ELegState.Search));
+        States.Add(ELegState.Step, new LegStepState(LContext, ELegState.Step));
+        States.Add(ELegState.Reset, new LegResetState(LContext, ELegState.Reset));
 
         CurrentState = States[ELegState.Reset]; // Set first state
     }

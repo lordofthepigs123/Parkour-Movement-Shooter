@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -7,7 +8,8 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     {
         Walk,
         Air,
-        Swing
+        Swing,
+        Animation,
     }
 
     private EnviromentInteractionContext _context;
@@ -21,7 +23,7 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private TwoBoneIKConstraint _rightIkConstraint;
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private CapsuleCollider _rootCollider;
-    [SerializeField] private BoxCollider _triggerCollider;
+    //[SerializeField] private BoxCollider _triggerCollider;
     
     [Header("Physics Simulation Tweaks")]
 
@@ -31,21 +33,28 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private float _maxStrideDisFWD;
     [SerializeField] private float _minStrideDisFWD;
     [SerializeField] private float _strideDisFallVel;
-    [SerializeField] private float _strideDisFalloff;
-    [SerializeField] private float _legLength;
     [SerializeField] private float _maxStepDownDis;
     [SerializeField] private float _placeOffsetDis;
     [SerializeField] private float _resetDur;
-    [SerializeField] private float _resetDurMod;
+    [SerializeField][Range(1,2)] private float _resetDurMod; 
+    [SerializeField] private float _ikEnterDur;
+    [SerializeField] private float _ikExitDur;
+    [SerializeField] private float _minActivePointDistance;
+    [SerializeField] private LayerMask _wallLayer;
 
     private void Awake()
     {
         _context = new EnviromentInteractionContext(_leftIkConstraint, _rightIkConstraint, _rb, _rootCollider, transform.root, _mr,
-         _maxStrideDisBAC, _minStrideDisBAC, _maxStrideDisFWD, _minStrideDisFWD, _strideDisFallVel, _strideDisFalloff, _legLength, _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod);
+         _maxStrideDisBAC, _minStrideDisBAC, _maxStrideDisFWD, _minStrideDisFWD, _strideDisFallVel,
+          _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod, _ikEnterDur, _ikExitDur, _minActivePointDistance, _wallLayer);
         
         //create new leg state machines and reference their context info
-        _leftFootMac = new LegStateMachine(_context, EnviromentInteractionContext.EBodySide.LEFT);
-        _rightFootMac = new LegStateMachine(_context, EnviromentInteractionContext.EBodySide.RIGHT);
+        Debug.Log("begin");
+        _leftFootMac = this.AddComponent<LegStateMachine>();
+        _leftFootMac.Init(_context, EnviromentInteractionContext.EBodySide.LEFT, EnviromentInteractionContext.EBodySide.RIGHT);
+        Debug.Log("check");
+        _rightFootMac = this.AddComponent<LegStateMachine>();
+        _rightFootMac.Init(_context, EnviromentInteractionContext.EBodySide.RIGHT, EnviromentInteractionContext.EBodySide.LEFT);
         _leftLContext = _leftFootMac.LContext;
         _rightLContext = _rightFootMac.LContext;
 

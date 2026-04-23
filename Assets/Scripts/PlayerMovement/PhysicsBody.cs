@@ -226,7 +226,7 @@ public class PhysicsBody : MonoBehaviour
     protected void angularResistance()
     {
         //spin drag
-        Vector3 tempDrag = -rb.angularVelocity * ((float)(1 / (1 + math.pow(100, -angFriction / 100)) - 0.5)) * 2;
+        Vector3 tempDrag = -rb.angularVelocity * (2 / (1 + math.pow(1.02f, -angFriction/100)) - 1); // 2 / (1 + d ^ (-k)) - 1
         if (!float.IsNaN(tempDrag.x))
             rb.AddTorque(tempDrag, ForceMode.Force);
     }

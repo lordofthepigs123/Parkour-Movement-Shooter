@@ -6,20 +6,19 @@ public abstract class StateManager<EState> : MonoBehaviour where EState : Enum
 {
     //Contains collection of all states & associated key to reference and set CurrentState
     protected Dictionary<EState, BaseState<EState>> States = new Dictionary<EState, BaseState<EState>>();
-
     protected BaseState<EState> CurrentState;
-    protected bool IsTransitioningState = true;
+    protected bool IsTransitioningState = false;
 
-    void Start()
+    private void Start()
     {
         CurrentState.EnterState();
     }
 
-    void Update()
+    private void Update()
     {
         EState nextStateKey = CurrentState.GetNextState();
 
-        if (CurrentState.Equals(CurrentState.StateKey) && !IsTransitioningState) // Run continous update of current state or transition to new
+        if (nextStateKey.Equals(CurrentState.StateKey) && !IsTransitioningState) // Run continous update of current state or transition to new
         {
             CurrentState.UpdateState();
         }
@@ -36,20 +35,5 @@ public abstract class StateManager<EState> : MonoBehaviour where EState : Enum
         CurrentState = States[stateKey];
         CurrentState.EnterState(); // run state enter
         IsTransitioningState = false;
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        CurrentState.OnTriggerEnter(other);
-    }
-
-    void OnTriggerStay(Collider other)
-    {
-        CurrentState.OnTriggerStay(other);
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        CurrentState.OnTriggerExit(other);
     }
 }

@@ -3,6 +3,31 @@ using UnityEngine;
 
 public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState>
 {
+    public EMovementState state;  // # remove
+
+    public enum EMovementState
+    {
+        freeze,
+        unlimited,
+        wedgegrabing,
+        swinging,
+        inhop,
+        accelrail,
+        grinding,
+        wallrunningup,
+        wallrunningdown,
+        wallresistdown,
+        wallrunning,
+        walking,
+        dashing,
+        rolling,
+        sliding,
+        standingup,
+        freefall,
+        prone,
+        air
+    }
+    
     [Header("Adjustable Variables")]
     [SerializeField] float groundDrag;
     [SerializeField] float slideDrag;
@@ -12,7 +37,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
     [SerializeField] float grindDrag;
     [SerializeField] float airDrag;
     [SerializeField] float dragFF;
-    [SerializeField] float movSpeed;
+    [SerializeField] float defaultMovSpeed;
     [SerializeField] float proneStickForce;
     [SerializeField] float proneSpeed;
     [SerializeField] float proneDrag;
@@ -39,31 +64,6 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
     public bool grinding;
     public bool inAir;
 
-    public EMovementState state;  // # remove
-
-    public enum EMovementState
-    {
-        freeze,
-        unlimited,
-        wedgegrabing,
-        swinging,
-        inhop,
-        accelrail,
-        grinding,
-        wallrunningup,
-        wallrunningdown,
-        wallresistdown,
-        wallrunning,
-        walking,
-        dashing,
-        rolling,
-        sliding,
-        standingup,
-        freefall,
-        prone,
-        air
-    }
-
     [Header("Components")]
     [SerializeField] protected Transform cam;
     public Vector3 rotAdjustPos;
@@ -88,10 +88,6 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
         pc = cam.GetComponent<PlayerCam>();
     }
 
-    private void Awake()
-    {
-        CurrentState = States[EMovementState.freeze];
-    }
 
     private void Update()
     {
@@ -163,7 +159,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
         {
             state = EMovementState.dashing;
             rb.linearDamping = airDrag;
-            pm.moveSpeed = movSpeed;
+            pm.moveSpeed = defaultMovSpeed;
             pc.fwdLocked = true;
         }
         //mode to Wall Running Up
@@ -195,7 +191,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
         {
             state = EMovementState.wallrunning;
             rb.linearDamping = wallRunDrag;
-            pm.moveSpeed = movSpeed;
+            pm.moveSpeed = defaultMovSpeed;
             pc.fwdLocked = true;
         }
         //Mode to Rolling
@@ -203,7 +199,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
         {
             state = EMovementState.rolling;
             rb.linearDamping = groundDrag;
-            pm.moveSpeed = movSpeed;
+            pm.moveSpeed = defaultMovSpeed;
             pc.fwdLocked = true;
         }
         //Mode to Slide
@@ -229,7 +225,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
             float tempPercent = ff.standUpRatio; // lerp mods from prone to walk
             float tempComp = 1 - tempPercent;
             rb.linearDamping = proneDrag * tempComp + groundDrag * tempPercent;
-            pm.moveSpeed = proneSpeed * tempComp + movSpeed * tempPercent;
+            pm.moveSpeed = proneSpeed * tempComp + defaultMovSpeed * tempPercent;
             pc.fwdLocked = true;
         }
         else if (ih.heldX && cm.grounded)
@@ -246,7 +242,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
             //Mode to freefall
             state = EMovementState.freefall;
             rb.linearDamping = dragFF;
-            pm.moveSpeed = movSpeed;
+            pm.moveSpeed = defaultMovSpeed;
             pc.fwdLocked = false;
         }
         //Mode to running
@@ -254,7 +250,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
         {
             state = EMovementState.walking;
             rb.linearDamping = groundDrag;
-            pm.moveSpeed = movSpeed;
+            pm.moveSpeed = defaultMovSpeed;
             pc.fwdLocked = true;
         }
         //Mode to air
@@ -262,7 +258,7 @@ public class PlayerStateMachine : StateManager<PlayerStateMachine.EMovementState
         {
             state = EMovementState.air;
             rb.linearDamping = airDrag;
-            pm.moveSpeed = movSpeed;
+            pm.moveSpeed = defaultMovSpeed;
             inAir = true;
             pc.fwdLocked = true;
         }

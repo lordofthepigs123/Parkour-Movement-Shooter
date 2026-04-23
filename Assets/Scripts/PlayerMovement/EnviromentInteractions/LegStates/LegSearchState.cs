@@ -1,31 +1,34 @@
 using UnityEngine;
 
-using thisEState = EnviromentInteractionStateMachine.EEnviromentInteractionState; // shorthand
+using thisEState = LegStateMachine.ELegState; // shorthand
 
-public class LegSearchState : EnviromentInteractionState
+public class LegSearchState : LegState
 {
-    public LegSearchState(EnviromentInteractionContext context, thisEState estate) : base(context, estate)
+    public LegSearchState(LegContext lContext, thisEState estate) : base(lContext, estate)
     {
-        EnviromentInteractionContext Context = context;
+
     }
 
     public override void EnterState(){}
     public override void ExitState(){}
-    public override void UpdateState(){}
+    public override void UpdateState()
+    {
+        LContext.FindLegNormal();//#
+        FindIkStepPosition();
+    }
     public override thisEState GetNextState()
     {
+        Debug.DrawRay(LContext.StepHit.point, LContext.StepHit.normal, Color.red, 1);
+
+        bool strideDisPassed = StrideDisPassed();
+        bool hitStepPointValid = LContext.StepHit.collider != null;
+        bool otherFootValidPosition = !LContext.ThisInvalidState;
+        //Debug.Log(strideDisPassed +" "+ hitStepPointValid +" "+ otherFootValidPosition);
+        if (strideDisPassed && hitStepPointValid && otherFootValidPosition)
+        {
+            return thisEState.Step;
+        }
         return StateKey;
     }
-    public override void OnTriggerEnter(Collider other)
-    {
-        StartIkTargetPositionTracking(other);
-    }
-    public override void OnTriggerStay(Collider other)
-    {
-        UpdateIkTargetPosition(other);
-    }
-    public override void OnTriggerExit(Collider other)
-    {
-        ResetIkTargetPositionTracking(other);
-    }
+    
 } 
