@@ -15,6 +15,7 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
 
     public enum ELegState
     {
+        AirSearch,
         Search,
         Step,
         Reset
@@ -27,12 +28,12 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
 
     private void InitializeStates() // Add States to inherited StateManager dictionary and set initial state
     {
-        Debug.Log(_side);
+        States.Add(ELegState.AirSearch, new LegAirSearchState(LContext, ELegState.AirSearch));
         States.Add(ELegState.Search, new LegSearchState(LContext, ELegState.Search));
         States.Add(ELegState.Step, new LegStepState(LContext, ELegState.Step));
         States.Add(ELegState.Reset, new LegResetState(LContext, ELegState.Reset));
 
-        CurrentState = States[ELegState.Reset]; // Set first state
+        CurrentState = States[ELegState.AirSearch]; // Set first state
     }
 
 /*

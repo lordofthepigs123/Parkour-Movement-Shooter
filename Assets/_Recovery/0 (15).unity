@@ -55516,7 +55516,7 @@ MonoBehaviour:
   _groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  _maxStrideDisBAC: 0.14
+  _maxStrideDisBAC: 0.5
   _minStrideDisBAC: 0.05
   _maxStrideDisFWD: 0.2
   _minStrideDisFWD: 0.01

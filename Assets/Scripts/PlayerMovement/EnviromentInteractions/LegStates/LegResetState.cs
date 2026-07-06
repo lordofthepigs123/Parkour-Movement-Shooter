@@ -20,10 +20,13 @@ public class LegResetState : LegState
     public override void UpdateState()
     {
         _contactTime += Time.deltaTime;
+
+        //set IK target
+        HoldIkTarget();
     }
     public override thisEState GetNextState()
     {
-        float resetTime = Co.ResetDur * Mathf.Pow(Co.ResetDurMod, Velocity.magnitude); // t / (1+k)^x
+        float resetTime = Co.ResetDur / Mathf.Pow(Co.ResetDurMod, Velocity.magnitude); // t / (1+k)^x
         if (_contactTime >= resetTime && Co.IsMoving())
         {
             Debug.Log("reset -> search");

@@ -14,21 +14,39 @@ public class LegSearchState : LegState
     public override void UpdateState()
     {
         LContext.FindLegNormal();//#
+        CalculateStride();
+
+        //active estimate of final landing step point
         FindIkStepPosition();
+
+        //set IK target
+        HoldIkTarget();
     }
     public override thisEState GetNextState()
     {
-        Debug.DrawRay(LContext.StepHit.point, LContext.StepHit.normal, Color.red, 1);
+        bool strideDisPassed = LContext.DistanceFromCenterFlat(LContext.ThisIkConstraint.data.tip.position) < -LContext.BackStride;
+        bool hitStepPointValid = LContext.StepCol != null;
+        bool otherFootValidPosition = !LContext.ThisOppositeInvalidState[LContext.OtherSide];
+        bool conditions = strideDisPassed && hitStepPointValid && otherFootValidPosition;
+        bool altConditions = (LContext.Side == EnviromentInteractionContext.EBodySide.RIGHT) && strideDisPassed && hitStepPointValid && !otherFootValidPosition;
 
-        bool strideDisPassed = StrideDisPassed();
-        bool hitStepPointValid = LContext.StepHit.collider != null;
-        bool otherFootValidPosition = !LContext.ThisInvalidState;
-        //Debug.Log(strideDisPassed +" "+ hitStepPointValid +" "+ otherFootValidPosition);
-        if (strideDisPassed && hitStepPointValid && otherFootValidPosition)
+        //round check
+        if (conditions)
         {
+            Debug.Log("Search -> Step1");
             return thisEState.Step;
         }
+        else if (altConditions)
+        {// if both invalid after loop Right leg priority
+            Debug.Log("Search -> Step2");
+            return thisEState.Step;
+        }
+        else
+        {
+            LContext.ThisOppositeInvalidState[LContext.Side] = false; //redund
+        }
+
         return StateKey;
-    }
+    }        
     
 } 

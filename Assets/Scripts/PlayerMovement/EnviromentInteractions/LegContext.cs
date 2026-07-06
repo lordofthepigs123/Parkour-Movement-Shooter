@@ -1,16 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using Side = EnviromentInteractionContext.EBodySide;
 
 public class LegContext
 {
-    private EnviromentInteractionContext.EBodySide _side;
-    private EnviromentInteractionContext.EBodySide _otherSide;
+    private Side _side;
+    private Side _otherSide;
     private TwoBoneIKConstraint _thisIkConstraint;
     private Transform _thisLegTransform;
     private Transform _thisTargetTransform;
-    private bool _thisInvalidState;
     private float _legLength;
-    public LegContext(EnviromentInteractionContext context, EnviromentInteractionContext.EBodySide side, EnviromentInteractionContext.EBodySide otherSide)
+    public LegContext(EnviromentInteractionContext context, Side side, Side otherSide)
     {
         Context = context;
 
@@ -19,26 +20,37 @@ public class LegContext
         _thisIkConstraint = Context.IkConstraint[Side];
         _thisLegTransform = Context.LegTransform[Side];
         _thisTargetTransform = Context.TargetTransform[Side];
-        _thisInvalidState = Context.OppositeInvalidState[OtherSide];
         _legLength = CalculatelegLength();
-
-        ThisOppositeInvalidState = Context.OppositeInvalidState[Side];
+        OriginalFootRot = _thisIkConstraint.data.tip.rotation;
     }
     //read only
-    public EnviromentInteractionContext.EBodySide Side => _side; // # public?
-    public EnviromentInteractionContext.EBodySide OtherSide => _otherSide;
+    public Side Side => _side;
+    public Side OtherSide => _otherSide;
     public TwoBoneIKConstraint ThisIkConstraint => _thisIkConstraint;
     public Transform ThisLegTransform => _thisLegTransform;//hip
     public Transform ThisTargetTransform => _thisTargetTransform;
-    public Vector3 ThisLegNormal {get; private set;}
-    public bool ThisInvalidState => _thisInvalidState;
+    public Vector3 ThisLegNormal {get; private set;} // normal of ground below current foot
+    public Vector3 ThisLegPoint {get; private set;} // point of hit below foot
+    public Quaternion OriginalFootRot {get; private set;} // normal of ground below current foot
     public float LegLength => _legLength;
+    public float WaistToDownDist => LegLength + Context.MaxStepDownDis; //from waist to largest step down distance
+
     //Set-able 
     public EnviromentInteractionContext Context {get; private set;}
-    public bool ThisOppositeInvalidState;
-    public RaycastHit StepHit;
+    public Dictionary<Side, bool> ThisOppositeInvalidState => Context.OppositeInvalidState;
+    public Vector3 StepPos; //current estimate final pos
+    public Vector3 StepNormal;
+    public Collider StepCol;
+    public Vector3 StridePos; //lerped position based on pos body og vs current / fwd stride
+    public Vector3 StrideNormal;
+    public Vector3 referencePos; //body position at stride start
+    public Vector3 startPos;
     public bool StrideInAir;
-    public RaycastHit FinalDestination;
+    public Vector3 LockedPosition; //target postion on current frame
+    public Quaternion LockedRotation;
+
+    public float FrontalStride;
+    public float BackStride;
 
     private float CalculatelegLength()
     {
@@ -47,30 +59,44 @@ public class LegContext
 
     public void FindLegNormal()
     {
-        ThisLegNormal = GetStepPointRaycast((Context.PlaceOffsetDis + 0.1f) * -Context.Rb.transform.up, ThisIkConstraint.data.tip.position).normal;
+        RaycastHit temp = GetStepPointRaycast((LegLength + 0.1f) * -Context.Rb.transform.up, ThisIkConstraint.data.tip.position);
+        ThisLegNormal = temp.normal; // zero if no hit
+        ThisLegPoint = temp.point; // zero if no hit
     }
 
     public RaycastHit GetStepPointRaycast(Vector3 checkDirLength, Vector3 checkPosition) //single foot ray check
     {
         RaycastHit pointHit;
-        Physics.Raycast(checkPosition, checkDirLength, out pointHit);
+        Physics.Raycast(checkPosition, checkDirLength, out pointHit, checkDirLength.magnitude, Context.GroundLayer);
         return pointHit;
     }
 
     
-    public float DistanceFromCenterFlat()
+    public float DistanceFromCenterFlat(Vector3 comparePoint)
     {
         //behind is negative, infront positive
         Vector3 velNormal = Vector3.ProjectOnPlane(Context.Rb.linearVelocity, ThisLegNormal).normalized;
-        Vector3 distance = ThisIkConstraint.data.tip.position - ThisIkConstraint.data.root.position;
-        distance = Vector3.Project(distance,velNormal);
-        return distance.magnitude * Vector3.Dot(velNormal, distance.normalized);
+        Vector3 distance = comparePoint - ThisIkConstraint.data.root.position;
+        Vector3 flatDis = Vector3.ProjectOnPlane(distance,ThisLegNormal);
+        float sign = Vector3.Dot(velNormal, Vector3.Project(distance.normalized,velNormal).normalized);
+        
+        return flatDis.magnitude * sign;
     }
 
     public float ActivePointDistance()
     {
-        Vector3 distance = StepHit.point - ThisIkConstraint.data.tip.position;
+        Vector3 distance = StepPos - ThisIkConstraint.data.tip.position;
         return distance.magnitude;
+    }
+
+    public Vector3 rootOnGroundPosition()
+    {
+        //get floor directly below legs root
+        RaycastHit temp = GetStepPointRaycast((LegLength + 0.1f) * -Context.Rb.transform.up, ThisIkConstraint.data.root.position);
+        if (temp.normal != Vector3.zero)
+            return temp.point;
+
+        return Context.RootTransform.position; // return the tranforms position
     }
     
 }

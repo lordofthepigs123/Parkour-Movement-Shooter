@@ -25,9 +25,9 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private CapsuleCollider _rootCollider;
     //[SerializeField] private BoxCollider _triggerCollider;
     
-    [Header("Physics Simulation Tweaks")]
-
+    [Header("Striding control")]
     [SerializeField] private MainRagdollHandeler _mr;
+    [SerializeField] private LayerMask _groundLayer;
     [SerializeField] private float _maxStrideDisBAC;
     [SerializeField] private float _minStrideDisBAC;
     [SerializeField] private float _maxStrideDisFWD;
@@ -40,13 +40,16 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private float _ikEnterDur;
     [SerializeField] private float _ikExitDur;
     [SerializeField] private float _minActivePointDistance;
-    [SerializeField] private LayerMask _wallLayer;
+    [SerializeField] private float _maxFootlift;
+    [SerializeField] private float _minFootlift;
+    [SerializeField] private AnimationCurve _strideCurve;
+    [SerializeField] private AnimationCurve _strideHeightCurve;
 
-    private void Awake()
+    private void Start()
     {
-        _context = new EnviromentInteractionContext(_leftIkConstraint, _rightIkConstraint, _rb, _rootCollider, transform.root, _mr,
+        _context = new EnviromentInteractionContext(_leftIkConstraint, _rightIkConstraint, _rb, _rootCollider, transform.root, _mr, _groundLayer,
          _maxStrideDisBAC, _minStrideDisBAC, _maxStrideDisFWD, _minStrideDisFWD, _strideDisFallVel,
-          _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod, _ikEnterDur, _ikExitDur, _minActivePointDistance, _wallLayer);
+          _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod, _ikEnterDur, _ikExitDur, _minActivePointDistance, _maxFootlift, _minFootlift, _strideCurve, _strideHeightCurve);
         
         //create new leg state machines and reference their context info
         Debug.Log("begin");

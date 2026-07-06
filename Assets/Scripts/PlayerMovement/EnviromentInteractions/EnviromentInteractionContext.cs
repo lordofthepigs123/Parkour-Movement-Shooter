@@ -31,18 +31,24 @@ public class EnviromentInteractionContext
     private float _ikEnterDur;
     private float _ikExitDur;
     private float _minActivePointDistance;
-    private LayerMask _wallLayer;
+    private LayerMask _groundLayer;
+    private float _maxFootlift;
+    private float _minFootlift;
+    private AnimationCurve _strideCurve;
+    private AnimationCurve _strideHeightCurve;
 
     //constructor
     public EnviromentInteractionContext(TwoBoneIKConstraint leftIkConstraint, TwoBoneIKConstraint rightIkConstraint, Rigidbody rb,
-     Collider rootCollider, Transform rootTransform, MainRagdollHandeler mr, float maxStrideDisBAC, float minStrideDisBAC,
+     Collider rootCollider, Transform rootTransform, MainRagdollHandeler mr, LayerMask groundLayer, float maxStrideDisBAC, float minStrideDisBAC,
       float maxStrideDisFWD, float minStrideDisFWD, float strideDisFallVel, float maxStepDownDis, float placeOffsetDis
-      , float resetDur, float resetDurMod, float ikEnterDur, float ikExitDur, float minActivePointDistance, LayerMask wallLayer)
+      , float resetDur, float resetDurMod, float ikEnterDur, float ikExitDur, float minActivePointDistance, float maxFootlift,
+       float minFootlift, AnimationCurve strideCurve, AnimationCurve strideHeightCurve)
     {
         _rb = rb;
         _rootCollider = rootCollider;
         _rootTransform = rootTransform;
         _mr = mr;
+        _groundLayer = groundLayer;
         _maxStrideDisBAC = maxStrideDisBAC;
         _difStrideDisBAC = maxStrideDisBAC - minStrideDisBAC;
         _difStrideDisFWD = maxStrideDisFWD - minStrideDisFWD;
@@ -55,7 +61,10 @@ public class EnviromentInteractionContext
         _ikEnterDur = ikEnterDur;
         _ikExitDur = ikExitDur;
         _minActivePointDistance = minActivePointDistance;
-        _wallLayer = wallLayer;
+        _maxFootlift = maxFootlift;
+        _minFootlift = minFootlift;
+        _strideCurve = strideCurve;
+        _strideHeightCurve = strideHeightCurve;
 
         _ikConstraint.Add(EBodySide.LEFT, leftIkConstraint);
         _ikConstraint.Add(EBodySide.RIGHT, rightIkConstraint);
@@ -77,6 +86,7 @@ public class EnviromentInteractionContext
     public Collider RootCollider => _rootCollider;
     public Transform RootTransform => _rootTransform;
     public MainRagdollHandeler Mr => _mr;
+    public LayerMask GroundLayer => _groundLayer;
     public float MaxStrideDisBAC => _maxStrideDisBAC;
     public float DifStrideDisBAC => _difStrideDisBAC;
     public float DifStrideDisFWD => _difStrideDisFWD;
@@ -89,6 +99,10 @@ public class EnviromentInteractionContext
     public float IkEnterDur => _ikEnterDur;
     public float IkExitDur => _ikExitDur;
     public float MinActivePointDistance =>_minActivePointDistance;
+    public float MaxFootlift => _maxFootlift;
+    public float MinFootlift => _minFootlift;
+    public AnimationCurve StrideCurve => _strideCurve;
+    public AnimationCurve StrideHeightCurve => _strideHeightCurve;
 
     //Set-able variables
     public Dictionary<EBodySide, bool> OppositeInvalidState = new Dictionary<EBodySide, bool>();
@@ -96,6 +110,7 @@ public class EnviromentInteractionContext
     {
         return Rb.linearVelocity.magnitude > 0.2f;
     }
+
     /*
     public void SetCurrentSide(Vector3 positionToCheck) // #
     {
