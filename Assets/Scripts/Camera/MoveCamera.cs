@@ -1,24 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveCamera : MonoBehaviour
 {
-    public PlayerStateMachine sm;
-    public Transform cameraPosition;
-    public Transform PlayerTransform;
+    [Header("MoveCamera")]
+    public float cameraUpDis;
     public float cameraForwardDis;
-    public float rollRatio;
 
-    // Update is called once per frame
+    [HideInInspector] public bool rolling;
+
+    [Header("Components")]
+    public Transform headBone;
+
     void Update()
     {
-        Vector3 desiPos;
-        if (sm.state == PlayerStateMachine.EMovementState.rolling)
-            desiPos = cameraPosition.position * rollRatio + PlayerTransform.position * (1 - rollRatio);
-        else
-            desiPos = cameraPosition.position;
-        desiPos += transform.forward * cameraForwardDis;
+        Vector3 desiPos= headBone.position;
+        desiPos += -headBone.forward * cameraUpDis + headBone.up * cameraForwardDis;
         transform.position = desiPos;
     }
 }

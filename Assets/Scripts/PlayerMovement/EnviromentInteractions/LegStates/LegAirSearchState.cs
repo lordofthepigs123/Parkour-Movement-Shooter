@@ -24,9 +24,9 @@ public class LegAirSearchState : LegState
     {
         if (LContext.ThisLegNormal != Vector3.zero)
         {
-            SetIkTarget(LContext.ThisLegPoint, LContext.ThisLegNormal);
-            Debug.Log("airSearch -> reset");
-            return thisEState.Reset;
+            SetIkTarget(LContext.ThisLegPoint, Quaternion.FromToRotation(Vector3.up,LContext.ThisLegNormal) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up)));
+            Debug.Log("AirSearch -> Search");
+            return thisEState.Search;
         }
         return StateKey;
     }

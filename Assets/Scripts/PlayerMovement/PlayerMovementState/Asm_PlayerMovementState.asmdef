@@ -1,0 +1,18 @@
+{
+    "name": "Asm_PlayerMovementState",
+    "rootNamespace": "",
+    "references": [
+        "GUID:620aadd9d647945a787bcc81eb1fef74",
+        "GUID:6cbd1e4fecef2408891525bca3e44ac0",
+        "GUID:223499540657a4c028e4814fd9cede3a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

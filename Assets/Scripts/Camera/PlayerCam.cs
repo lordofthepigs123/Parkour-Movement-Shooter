@@ -19,11 +19,9 @@ public class PlayerCam : MonoBehaviour
     [Header("Components")]
     [SerializeField] Transform orientation;
     [SerializeField] Transform camHolder;
-    [SerializeField] RangedHandler rh;
     [SerializeField] Transform cam;
-    [SerializeField] PlayerStateMachine sm;
-    [SerializeField] InputHandler ih;
     [SerializeField] Rigidbody rb;
+    private MoveCamera mc;
 
     public float xRotation;// -180 - 180
     public float yRotation;// -180 - 180
@@ -46,6 +44,7 @@ public class PlayerCam : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        mc = cam.GetComponent<MoveCamera>();
         DoTilt(0f);
     }
 
@@ -144,16 +143,16 @@ public class PlayerCam : MonoBehaviour
         tilt = zTilt;
     }
 
-    public void DoRecoil(Vector3 tRotation)
+    public void DoRecoil(Vector3 tRotation, float snappiness)
     {
         tRotation = new Vector3(tRotation.x, tRotation.y, tRotation.z + tilt);
-        cam.DOLocalRotate(tRotation, Time.fixedDeltaTime * rh.snappiness);
-        rh.gun.DOLocalRotate(tRotation, Time.fixedDeltaTime * rh.snappiness);
+        cam.DOLocalRotate(tRotation, Time.fixedDeltaTime * snappiness);
     }
+
     /*
     public void DoBarrel(float dir, int fix, float dur)
     {
-        xRotation = -xRotation + 180 * fix + ih.keyVertical * 20 * 2;
+        xRotation = -xRotation + 180 * fix + dir * 20 * 2;
         yRotation += 180;
         barrelAngle += 180 * (int)dir;
         sequence.Kill();
@@ -169,6 +168,15 @@ public class PlayerCam : MonoBehaviour
         rollTimer = dur;
         applyRatio = 0;
         DOTween.To(() => applyRatio, x => applyRatio = x, 1, dur).SetEase(rollCurve);
+    }
+
+    public void DoShrink(float dur) //#
+    {
+        mc.rolling = true;
+        DOVirtual.DelayedCall(dur, () => 
+        {
+            mc.rolling = false;
+        });
     }
 
     private Quaternion RollApply()

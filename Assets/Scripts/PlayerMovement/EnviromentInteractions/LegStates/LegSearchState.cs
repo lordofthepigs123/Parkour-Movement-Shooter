@@ -4,47 +4,76 @@ using thisEState = LegStateMachine.ELegState; // shorthand
 
 public class LegSearchState : LegState
 {
+    private float resetTimer;
     public LegSearchState(LegContext lContext, thisEState estate) : base(lContext, estate)
     {
 
     }
 
-    public override void EnterState(){}
+    public override void EnterState()
+    {
+        resetTimer = Co.ResetDur;
+    }
     public override void ExitState(){}
     public override void UpdateState()
     {
-        LContext.FindLegNormal();//#
-        CalculateStride();
+        if (resetTimer > 0)
+        {
+            resetTimer -= Time.deltaTime * Mathf.Pow(Co.ResetDurMod, Co.Rb.linearVelocity.magnitude);
+        }
 
-        //active estimate of final landing step point
-        FindIkStepPosition();
+        LContext.FindLegNormal();//#
+        Co.CalculateStride();
 
         //set IK target
         HoldIkTarget();
     }
     public override thisEState GetNextState()
     {
-        bool strideDisPassed = LContext.DistanceFromCenterFlat(LContext.ThisIkConstraint.data.tip.position) < -LContext.BackStride;
-        bool hitStepPointValid = LContext.StepCol != null;
-        bool otherFootValidPosition = !LContext.ThisOppositeInvalidState[LContext.OtherSide];
-        bool conditions = strideDisPassed && hitStepPointValid && otherFootValidPosition;
-        bool altConditions = (LContext.Side == EnviromentInteractionContext.EBodySide.RIGHT) && strideDisPassed && hitStepPointValid && !otherFootValidPosition;
+        float displace = LContext.DistanceFromCenterFlat(LContext.ThisIkConstraint.data.tip.position, LContext.Side);
+        float angDis = Vector3.Angle(LContext.LockedRotation * Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, LContext.LockedRotation * Vector3.up));
+        Debug.Log(angDis + " h");
+        float otherDisplace = LContext.DistanceFromCenterFlat(Co.LegIkConstraint[LContext.OtherSide].data.tip.position, LContext.OtherSide);
+        float faceDirVelDot = Vector3.Dot(Vector3.ProjectOnPlane(Co.RootTransform.forward, CurrentNormal).normalized, FlatVelocity().normalized);
+        bool steppingFwd = faceDirVelDot >= Co.StepDirThresholdBuf * (Co.LastStepDir == EnviromentInteractionContext.EStepDir.BACKWARD ? 1 : -1); // Step fwd or back, with margin bias towards last direction
+        
+        bool strideDisPassed, maxAnglePassed, significantDis, hitStepPointValid, otherFootValidPosition, overStreched, otherFootForward, otherFootFired, reseted;
 
-        //round check
-        if (conditions)
+        //active estimate of final landing step point
+        if (steppingFwd)
         {
-            Debug.Log("Search -> Step1");
-            return thisEState.Step;
-        }
-        else if (altConditions)
-        {// if both invalid after loop Right leg priority
-            Debug.Log("Search -> Step2");
-            return thisEState.Step;
+            FindIkStepPosition(Co.FrontalStride);
+            strideDisPassed = displace < -Co.BackStride;
+            otherFootForward = otherDisplace > 0;
         }
         else
         {
-            LContext.ThisOppositeInvalidState[LContext.Side] = false; //redund
+            FindIkStepPosition(Co.BackStride);
+            strideDisPassed = displace < -Co.FrontalStride;
+            otherFootForward = otherDisplace > Co.BackStride / Co.BackRunDivisor;
         }
+        
+        maxAnglePassed = angDis > Co.MaxAngleChange;
+        significantDis = -displace > Co.MinCenterDisplacement;
+        hitStepPointValid = LContext.StepCol != null;
+        otherFootFired = Co.LastStepSide != LContext.Side; // in alternating order
+        reseted = resetTimer <= 0; // or reset time has passed
+        otherFootValidPosition = !LContext.ThisOppositeInvalidState[LContext.OtherSide]; // walking
+        overStreched = (LContext.ThisIkConstraint.data.tip.position - LContext.LockedPosition).magnitude > Co.StrechGive; // vs running 
+        bool conditions = ((strideDisPassed  && significantDis) || maxAnglePassed) && hitStepPointValid && (otherFootFired || reseted) && (otherFootValidPosition || (overStreched && otherFootForward));
+        if (steppingFwd && conditions)
+        {
+            Debug.Log("Search -> Step");
+            return thisEState.Step;
+        }
+
+        if (conditions)
+        {
+            Debug.Log("Search -> BackStep");
+            return thisEState.BackStep;
+        }
+        
+        LContext.ThisOppositeInvalidState[LContext.Side] = false; //redund
 
         return StateKey;
     }        

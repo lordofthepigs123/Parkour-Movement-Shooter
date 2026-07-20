@@ -36,7 +36,7 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
         }
         if (CurrentNormal.magnitude == 0)
         {
-            CurrentNormal = Co.Rb.transform.up;
+            CurrentNormal = Co.RootTransform.up;
         }
         hitFromRoot = default;
         return false;
@@ -45,7 +45,7 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
     protected void ResetIkTargetPositionTracking()
     {
         LContext.StepPos = Vector3.zero;
-        LContext.StepNormal = Vector3.zero;
+        Co.StepNormal[LContext.Side] = Vector3.zero;
         LContext.StepCol = null;
         LContext.LockedPosition = Vector3.zero;
         LContext.LockedRotation = LContext.OriginalFootRot;
@@ -64,30 +64,21 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
         return rayCastPos;
     }
 
-    protected void CalculateStride()
-    {
-        //as speed increases overall stride length increase
-        //but frontal(infront of player) stride decreases
-        LContext.FrontalStride = Mathf.Pow(Co.StrideDisFallVel, -FlatVelocity().magnitude) * Co.DifStrideDisFWD + Co.MinStrideDisFWD; // s = d / (1+2/k)^x + m
-        //and back(bahind player) stride increases
-        LContext.BackStride = Co.MaxStrideDisBAC - Mathf.Pow(Co.StrideDisFallVel, -Velocity.magnitude) * Co.DifStrideDisBAC; // s = m - d / (1+2/k)^x
-    }
-
-    private Vector3 FlatVelocity()
+    protected Vector3 FlatVelocity()
     {
         return Vector3.ProjectOnPlane(Velocity, CurrentNormal);
     }
 
-    protected void FindIkStepPosition()
+    protected void FindIkStepPosition(float inFront)
     {
         //set below player position #move to Search state
 
         RaycastHit hitFromRoot;
         RaycastHit hitWall;
-        if (!CheckInfrontWall(LContext.FrontalStride, out hitWall))
+        if (!CheckInfrontWall(inFront, out hitWall))
         {
             //Search IK position
-            hitFromRoot = LContext.GetStepPointRaycast(CalculateStepRaycastDirLength(), CalculateStepRaycastPosition(LContext.FrontalStride, FlatVelocity().normalized));
+            hitFromRoot = LContext.GetStepPointRaycast(CalculateStepRaycastDirLength(), CalculateStepRaycastPosition(inFront, FlatVelocity().normalized));
             if (hitFromRoot.collider != null)
             {
                 HitOffsetDecompose(hitFromRoot);
@@ -107,23 +98,23 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
         HitOffsetDecompose(hitFromRoot);
     }
 
-    protected void SetIkTarget(Vector3 position, Vector3 normal)
+    protected void SetIkTarget(Vector3 position, Quaternion rotation)
     {
         //LContext.ThisLegTransform.position
         LContext.LockedPosition = position;
-        LContext.LockedRotation = Quaternion.FromToRotation(Vector3.up, normal) * LContext.OriginalFootRot;
+        LContext.LockedRotation = rotation;
     }
 
     protected void HoldIkTarget()
     {
         LContext.ThisTargetTransform.position = LContext.LockedPosition;
-        LContext.ThisTargetTransform.localRotation = LContext.LockedRotation;
+        LContext.ThisTargetTransform.rotation = LContext.LockedRotation * LContext.OriginalFootRot;
     }
 
     private void HitOffsetDecompose(RaycastHit rayHit)
     {
         LContext.StepPos = rayHit.point + rayHit.normal * Co.PlaceOffsetDis;//away from surface, clipping
-        LContext.StepNormal = rayHit.normal;
+        Co.StepNormal[LContext.Side] = rayHit.normal;
         LContext.StepCol = rayHit.collider;
     }
 

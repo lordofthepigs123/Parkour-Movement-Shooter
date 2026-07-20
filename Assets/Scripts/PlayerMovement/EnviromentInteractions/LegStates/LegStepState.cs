@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using thisEState = LegStateMachine.ELegState; // shorthand
 
@@ -10,38 +11,51 @@ public class LegStepState : LegState
 
     public override void EnterState()
     {
+        Co.LastStepDir = EnviromentInteractionContext.EStepDir.FORWARD;
+        Co.LastStepSide = LContext.Side;
+        Co.StaticNormal[LContext.Side] = Vector3.zero;
         LContext.ThisOppositeInvalidState[LContext.Side] = true;
         LContext.referencePos = LContext.ThisIkConstraint.data.root.position; //save current root pos
         LContext.startPos = LContext.LockedPosition; //save current target
+        LContext.startNormal = LContext.LockedRotation * Vector3.up;
+        LContext.ActiveRatio = 0;
     }
     public override void ExitState()
     {
+        //lock in to final pos and rot
+        Co.StaticNormal[LContext.Side] = Co.StepNormal[LContext.Side];
+        LContext.StridePos = LContext.StepPos;
+        LContext.StrideRotation = Quaternion.FromToRotation(Vector3.up,Co.StepNormal[LContext.Side]) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
+        SetIkTarget(LContext.StridePos, LContext.StrideRotation); //#
+        HoldIkTarget();
+
+        //resets
         LContext.ThisOppositeInvalidState[LContext.Side] = false;
     }
     public override void UpdateState()
     {
         LContext.FindLegNormal();//#more robust
-        CalculateStride();
+        Co.CalculateStride();
         //other leg can't step until this toe past center
-        LContext.ThisOppositeInvalidState[LContext.Side] = LContext.DistanceFromCenterFlat(LContext.ThisIkConstraint.data.tip.position) < 0;
+        LContext.ThisOppositeInvalidState[LContext.Side] = LContext.DistanceFromCenterFlat(LContext.ThisIkConstraint.data.tip.position, LContext.Side) < 0;
 
         //active estimate of final landing step point
-        FindIkStepPosition();
+        FindIkStepPosition(Co.FrontalStride);
 
         //find and set next IK target
         FindNextIkStridePosition();
-        SetIkTarget(LContext.StridePos, LContext.StrideNormal); //#
+        SetIkTarget(LContext.StridePos, LContext.StrideRotation); //#
         HoldIkTarget();
     }
     public override thisEState GetNextState()
     {
-        bool inHitProximity = LContext.ActivePointDistance() < Co.MinActivePointDistance;
+        bool fullCycle = LContext.ActiveRatio > Co.MinCompleteRatio;
         bool hitStepPointValid = LContext.StepCol != null;
-        if (inHitProximity && hitStepPointValid)
+        if (fullCycle && hitStepPointValid)
         {
             //home in on contact position, frozen
-            Debug.Log("step -> reset");
-            return thisEState.Reset;
+            Debug.Log("Step -> Search");
+            return thisEState.Search;
         }
 
         //altarnative into air/jump
@@ -51,31 +65,40 @@ public class LegStepState : LegState
 
     private void FindNextIkStridePosition()
     {
-        LContext.StrideNormal = LContext.StepNormal; //#
-
-        //get ratio _ traveled dis : frontal stride
-        float progressRatio = -LContext.DistanceFromCenterFlat(LContext.referencePos) / LContext.FrontalStride;
+        //get ratio _ traveled dis : ToMoveDisStride
+        float progressRatio = -LContext.DistanceFromCenterFlat(LContext.referencePos, LContext.Side) / Co.ToMoveDisStride;
+        if (float.IsNaN(progressRatio) || Co.ToMoveDisStride < 0.001f)
+            progressRatio = 1;
         progressRatio = Mathf.Clamp(progressRatio, 0 , 1);
-        //(LContext.BackStride + LContext.DistanceFromCenterFlat()) / totalStride;
+        //Determine if current progressRatio speed is too fast compared to player velocity
+        float approxDis = FlatVelocity().magnitude * Co.SpeedLimiterThreshold * Time.deltaTime; // distance allowed to travel before modifying
+        float ratioDif = progressRatio - LContext.ActiveRatio;
+        float ratioDis = ratioDif * Co.ToMoveDisStride;
+        float distanceOvershoot = ratioDis - approxDis;
+        if (distanceOvershoot <= 0)
+        {
+            LContext.ActiveRatio = progressRatio;
+        }
+        else
+        { // clamp to removeovershoot (slows down speed)
+            LContext.ActiveRatio += approxDis / Co.ToMoveDisStride;
+        }
 
+        Vector3 transitionNormal = Vector3.Lerp(LContext.startNormal, Co.StepNormal[LContext.Side], LContext.ActiveRatio).normalized; // Lerped normal between start surface and final
+        
         //calc animation graph forward stride progress horizontal
-        float horizontalPosRatio = Co.StrideCurve.Evaluate(progressRatio);
+        float horizontalPosRatio = Co.StrideCurve.Evaluate(LContext.ActiveRatio);
         //calc animation graph height
-        float normalMult = Co.StrideHeightCurve.Evaluate(progressRatio);
-        Vector3 normalAdd = LContext.StrideNormal * normalMult;
-        //Debug.Log(progressRatio + "  " + horizontalPosRatio);
-        //# Set locked as center for stop
-        //LContext.StepPos - activly changing infornt raycast point
-        //LContext.LockedPosition LContext.StridePos - this frame point of movement
-        //LContext.referencePos - center position at time of start stride
-        //LContext.ThisIkConstraint.data.root.position - center position now
-        //Co.
+        float normalMult = Co.StrideHeightCurve.Evaluate(LContext.ActiveRatio);
+        Vector3 normalAdd = Co.FootLiftMult * normalMult * transitionNormal;
 
         Vector3 toStepDif = LContext.StepPos - LContext.startPos;
-        Debug.DrawRay(LContext.StepPos, Vector3.up * 2, Color.red);
-        Debug.DrawRay(LContext.startPos, Vector3.up * 2, Color.blue);
+        //Debug.DrawRay(LContext.StepPos, Vector3.up * 2, Color.red);
+        //Debug.DrawRay(LContext.startPos, Vector3.up * 2, Color.blue);
         LContext.StridePos = LContext.startPos + toStepDif * horizontalPosRatio + normalAdd;
-        Debug.DrawRay(LContext.StridePos, Vector3.up * 2, Color.green);
-        Debug.Log(progressRatio);
+        //Debug.DrawRay(LContext.StridePos, Vector3.up * 2, Color.green);
+
+        float footRotAngle = Co.FootRotCurve.Evaluate(LContext.ActiveRatio) * 90 * Co.FootLiftMult; // scale rotation magnitude based on foot lift mult
+        LContext.StrideRotation = Quaternion.AngleAxis(footRotAngle, Vector3.right) * Quaternion.FromToRotation(Vector3.up,transitionNormal) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
     }
 }

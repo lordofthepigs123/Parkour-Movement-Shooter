@@ -1,0 +1,24 @@
+{
+    "name": "Asm_FoundationalSystems",
+    "rootNamespace": "",
+    "references": [
+        "GUID:21d1eb854b91ade49bc69a263d12bee2",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:223499540657a4c028e4814fd9cede3a",
+        "GUID:6cbd1e4fecef2408891525bca3e44ac0",
+        "GUID:53839814abd85445cb5eaca5fbba0b60",
+        "GUID:1c945cc38028b4f20af48ddc74a59db8",
+        "GUID:d2d2144c1eb19412390d22779794781c",
+        "GUID:26f2387abfd134f8e874a7d32d290a82",
+        "GUID:ea6934f56013c4db9a533b311f2945b3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,18 @@
+{
+    "name": "Asm_Backend",
+    "rootNamespace": "",
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:620aadd9d647945a787bcc81eb1fef74",
+        "GUID:1c945cc38028b4f20af48ddc74a59db8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

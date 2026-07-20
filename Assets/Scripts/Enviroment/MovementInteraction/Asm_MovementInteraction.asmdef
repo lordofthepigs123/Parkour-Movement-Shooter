@@ -1,0 +1,18 @@
+{
+    "name": "Asm_MovementInteraction",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:21d1eb854b91ade49bc69a263d12bee2",
+        "GUID:ea6934f56013c4db9a533b311f2945b3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

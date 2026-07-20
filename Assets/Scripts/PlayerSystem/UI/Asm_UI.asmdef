@@ -1,0 +1,17 @@
+{
+    "name": "Asm_UI",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:6cbd1e4fecef2408891525bca3e44ac0"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

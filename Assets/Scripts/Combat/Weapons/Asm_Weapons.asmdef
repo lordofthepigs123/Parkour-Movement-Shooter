@@ -1,0 +1,21 @@
+{
+    "name": "Asm_Weapons",
+    "rootNamespace": "",
+    "references": [
+        "GUID:53839814abd85445cb5eaca5fbba0b60",
+        "GUID:6cbd1e4fecef2408891525bca3e44ac0",
+        "GUID:223499540657a4c028e4814fd9cede3a",
+        "GUID:1c945cc38028b4f20af48ddc74a59db8",
+        "GUID:0bd3c5cc36d1f418a9c5def3b7c924a1",
+        "GUID:ea6934f56013c4db9a533b311f2945b3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

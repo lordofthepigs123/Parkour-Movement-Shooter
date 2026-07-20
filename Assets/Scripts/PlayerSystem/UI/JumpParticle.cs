@@ -23,6 +23,8 @@ public class JumpParticle : MonoBehaviour
         //do particle change
         trans.DOScale(trans.localScale * growSize, lifeTime);
         trans.DOMove(transform.position + Vector3.up * travelDisBase * travelDis,lifeTime);
-        image.DOFade(1,lifeTime).SetEase(alphaCurve);
+
+        DOTween.To(() => image.color, x => image.color = x, new Color(image.color.r, image.color.g, image.color.b, 1), lifeTime).SetEase(alphaCurve);
+        //image.DOFade(1,lifeTime).SetEase(alphaCurve); #
     }
 }

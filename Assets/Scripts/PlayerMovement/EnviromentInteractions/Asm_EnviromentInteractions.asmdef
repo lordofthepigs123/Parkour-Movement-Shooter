@@ -1,0 +1,19 @@
+{
+    "name": "Asm_EnviromentInteractions",
+    "rootNamespace": "",
+    "references": [
+        "GUID:7f7d1af65c2641843945d409d28f2e20",
+        "GUID:620aadd9d647945a787bcc81eb1fef74",
+        "GUID:0bd3c5cc36d1f418a9c5def3b7c924a1",
+        "GUID:ea73b55e2dab74d719c0a02affd381f0"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

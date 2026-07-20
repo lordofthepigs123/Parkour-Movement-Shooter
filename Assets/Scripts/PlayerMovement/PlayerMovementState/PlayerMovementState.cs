@@ -7,13 +7,13 @@ public abstract class PlayerMovementState : BaseState<PlayerStateMachine.EMoveme
     [SerializeField] protected float MoveSpeed;
     [SerializeField] protected bool FwdLocked;
     protected Rigidbody Rb;
-    protected PlayerMovement Pm;
     protected PlayerCam Pc;
+    protected MovementContext Context;
 
-    public PlayerMovementState(Rigidbody rb, PlayerMovement pm, PlayerCam pc ,PlayerStateMachine.EMovementState stateKey) : base(stateKey)
+    public PlayerMovementState(MovementContext _context ,Rigidbody rb, PlayerCam pc ,PlayerStateMachine.EMovementState stateKey) : base(stateKey)
     {
+        Context = _context;
         Rb = rb;
-        Pm = pm;
         Pc = pc;
     }
 
@@ -21,7 +21,7 @@ public abstract class PlayerMovementState : BaseState<PlayerStateMachine.EMoveme
     {
         if (Freeze)
             Rb.linearVelocity = Vector3.zero;
-        Pm.moveSpeed = MoveSpeed;
+        Context.moveSpeed = MoveSpeed;
         Pc.fwdLocked = FwdLocked;
     }
 

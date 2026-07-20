@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: RenderOpaque
+  m_Name: WeaponRenderOpaque
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.RenderObjects
   m_Active: 1
   settings:
-    passTag: RenderOpaque
-    Event: 550
+    passTag: WeaponRenderOpaque
+    Event: 300
     filterSettings:
       RenderQueueType: 0
       LayerMask:
@@ -29,6 +29,48 @@ MonoBehaviour:
     overrideMode: 1
     overrideDepthState: 1
     depthCompareFunction: 8
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
+--- !u!114 &-5025708549939198423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: BodyRenderTransparent
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.RenderObjects
+  m_Active: 1
+  settings:
+    passTag: BodyRenderTransparent
+    Event: 500
+    filterSettings:
+      RenderQueueType: 1
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 8
+      PassNames: []
+    overrideMaterial: {fileID: 0}
+    overrideMaterialPassIndex: 0
+    overrideShader: {fileID: 0}
+    overrideShaderPassIndex: 0
+    overrideMode: 1
+    overrideDepthState: 1
+    depthCompareFunction: 4
     enableWrite: 1
     stencilSettings:
       overrideStencilState: 0
@@ -90,9 +132,11 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -7579488582175813439}
   - {fileID: 6526263124354122523}
+  - {fileID: 5840698918246821468}
+  - {fileID: -5025708549939198423}
   - {fileID: 3067419799568640382}
   - {fileID: -1177984005902913408}
-  m_RendererFeatureMap: c11048d84a3fd0961bc3dbe5bbf1915a7ee9494a0eaa912a80b010b1c9f5a6ef
+  m_RendererFeatureMap: c11048d84a3fd0961bc3dbe5bbf1915a5c2e1c86b8540e5129063b80b31841ba7ee9494a0eaa912a80b010b1c9f5a6ef
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -163,6 +207,48 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &5840698918246821468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: BodyRenderOpaque
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.RenderObjects
+  m_Active: 1
+  settings:
+    passTag: BodyRenderOpaque
+    Event: 300
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 8
+      PassNames: []
+    overrideMaterial: {fileID: 0}
+    overrideMaterialPassIndex: 0
+    overrideShader: {fileID: 0}
+    overrideShaderPassIndex: 0
+    overrideMode: 1
+    overrideDepthState: 1
+    depthCompareFunction: 4
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &6526263124354122523
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -173,12 +259,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: RenderTransparent
+  m_Name: WeaponRenderTransparent
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.RenderObjects
   m_Active: 1
   settings:
-    passTag: RenderTransparent
-    Event: 300
+    passTag: WeaponRenderTransparent
+    Event: 500
     filterSettings:
       RenderQueueType: 1
       LayerMask:

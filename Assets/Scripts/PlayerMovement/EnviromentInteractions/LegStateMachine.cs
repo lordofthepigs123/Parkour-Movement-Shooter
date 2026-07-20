@@ -18,7 +18,7 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
         AirSearch,
         Search,
         Step,
-        Reset
+        BackStep
     }
 
     private EnviromentInteractionContext _context;
@@ -31,7 +31,7 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
         States.Add(ELegState.AirSearch, new LegAirSearchState(LContext, ELegState.AirSearch));
         States.Add(ELegState.Search, new LegSearchState(LContext, ELegState.Search));
         States.Add(ELegState.Step, new LegStepState(LContext, ELegState.Step));
-        States.Add(ELegState.Reset, new LegResetState(LContext, ELegState.Reset));
+        States.Add(ELegState.BackStep, new LegBackStepState(LContext, ELegState.BackStep));
 
         CurrentState = States[ELegState.AirSearch]; // Set first state
     }

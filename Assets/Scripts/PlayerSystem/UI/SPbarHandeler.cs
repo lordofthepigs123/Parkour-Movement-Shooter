@@ -8,10 +8,10 @@ public class SPbarHandeler : MonoBehaviour
     [SerializeField] Slider SP_bar;
     [SerializeField] GameObject SP_obj;
     [SerializeField] GameObject effect_obj;
-    public bool Held;
-    public float Value;
+    [SerializeField] InputHandler ih;
     public float baseTime;
     private float timer;
+    private float Value;
     private Vector3 basePos;
     private void Start()
     {
@@ -30,13 +30,16 @@ public class SPbarHandeler : MonoBehaviour
 
     private void Update()
     {
+        //SPACE Bar UI 
+        Value = ih.holdTimeSPACE / (ih.acuTime * 2);
         Mathf.Clamp(Value, 0, 1);
+
         if (!_enabled && timer < baseTime)
             effects();
         else
             SP_bar.value = 100 * Value;
 
-        if (!Held && _enabled)
+        if (!ih.heldSPACE && _enabled)
         {
             var renderers = SP_obj.GetComponentsInChildren<Image>();
             foreach (Image image in renderers)
@@ -54,7 +57,7 @@ public class SPbarHandeler : MonoBehaviour
             return;
         }
 
-        if (Held && !_enabled)
+        if (ih.heldSPACE && !_enabled)
         {
             var renderers = SP_obj.GetComponentsInChildren<Image>();
             foreach (Image image in renderers)
