@@ -1,6 +1,6 @@
 using UnityEngine;
-
-using thisEState = LegStateMachine.ELegState; // shorthand
+using thisEState = LegStateMachine.ELegState; // shorthands
+using EEnviroment = EnviromentInteractionStateMachine.EEnviromentInteractionState;
 
 public class LegSearchState : LegState
 {
@@ -28,17 +28,22 @@ public class LegSearchState : LegState
         //set IK target
         HoldIkTarget();
     }
+    public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
-        float displace = LContext.DistanceFromCenterFlat(LContext.ThisIkConstraint.data.tip.position, LContext.Side);
+        if (Co.Eism.CurrentStateKey ==  EEnviroment.Air)
+        {
+            //Debug.Log("Search -> AirSearch");
+            return thisEState.AirSearch;
+        }
+
+        float displace = LContext.DistanceFromCenterFlat(LContext.TranslateAdjustOnNormal(LContext.ThisIkConstraint.data.tip.position), LContext.Side);
         float angDis = Vector3.Angle(LContext.LockedRotation * Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, LContext.LockedRotation * Vector3.up));
-        Debug.Log(angDis + " h");
-        float otherDisplace = LContext.DistanceFromCenterFlat(Co.LegIkConstraint[LContext.OtherSide].data.tip.position, LContext.OtherSide);
+        float otherDisplace = LContext.DistanceFromCenterFlat(LContext.TranslateAdjustOnNormal(Co.LegIkConstraint[LContext.OtherSide].data.tip.position), LContext.OtherSide);
         float faceDirVelDot = Vector3.Dot(Vector3.ProjectOnPlane(Co.RootTransform.forward, CurrentNormal).normalized, FlatVelocity().normalized);
         bool steppingFwd = faceDirVelDot >= Co.StepDirThresholdBuf * (Co.LastStepDir == EnviromentInteractionContext.EStepDir.BACKWARD ? 1 : -1); // Step fwd or back, with margin bias towards last direction
         
         bool strideDisPassed, maxAnglePassed, significantDis, hitStepPointValid, otherFootValidPosition, overStreched, otherFootForward, otherFootFired, reseted;
-
         //active estimate of final landing step point
         if (steppingFwd)
         {
@@ -60,16 +65,16 @@ public class LegSearchState : LegState
         reseted = resetTimer <= 0; // or reset time has passed
         otherFootValidPosition = !LContext.ThisOppositeInvalidState[LContext.OtherSide]; // walking
         overStreched = (LContext.ThisIkConstraint.data.tip.position - LContext.LockedPosition).magnitude > Co.StrechGive; // vs running 
-        bool conditions = ((strideDisPassed  && significantDis) || maxAnglePassed) && hitStepPointValid && (otherFootFired || reseted) && (otherFootValidPosition || (overStreched && otherFootForward));
+        bool conditions = ((strideDisPassed && significantDis) || maxAnglePassed) && hitStepPointValid && (otherFootFired || reseted) && (otherFootValidPosition || (overStreched && otherFootForward));
         if (steppingFwd && conditions)
         {
-            Debug.Log("Search -> Step");
+            //Debug.Log("Search -> Step");
             return thisEState.Step;
         }
 
         if (conditions)
         {
-            Debug.Log("Search -> BackStep");
+            //Debug.Log("Search -> BackStep");
             return thisEState.BackStep;
         }
         

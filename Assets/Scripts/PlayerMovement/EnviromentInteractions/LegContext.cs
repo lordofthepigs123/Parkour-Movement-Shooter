@@ -5,14 +5,16 @@ using Side = EnviromentInteractionContext.EBodySide;
 
 public class LegContext
 {
+    private LegStateMachine _lsm;
     private Side _side;
     private Side _otherSide;
     private TwoBoneIKConstraint _thisIkConstraint;
     private Transform _thisLegTransform;
     private Transform _thisTargetTransform;
     private float _legLength;
-    public LegContext(EnviromentInteractionContext context, Side side, Side otherSide)
+    public LegContext(LegStateMachine lsm, EnviromentInteractionContext context, Side side, Side otherSide)
     {
+        _lsm = lsm;
         Context = context;
 
         _side = side;
@@ -24,6 +26,7 @@ public class LegContext
         OriginalFootRot = _thisIkConstraint.data.tip.rotation;
     }
     //read only
+    public LegStateMachine Lsm => _lsm;
     public Side Side => _side;
     public Side OtherSide => _otherSide;
     public TwoBoneIKConstraint ThisIkConstraint => _thisIkConstraint;
@@ -45,9 +48,11 @@ public class LegContext
     public Vector3 referencePos; //body position at stride start
     public Vector3 startPos; //foot position at stride start
     public Vector3 startNormal; //foot position at stride start
+    public Vector3 rayDirNormal; //direction used for raycast check step position
     public bool StrideInAir;
     public Vector3 LockedPosition; //target postion on current frame
     public Quaternion LockedRotation;
+    public bool AirFrontLeg;
 
     public float ActiveRatio;
 
@@ -59,8 +64,16 @@ public class LegContext
     public void FindLegNormal()
     {
         RaycastHit temp = GetStepPointRaycast((LegLength + 0.1f) * -Context.RootTransform.up, ThisIkConstraint.data.tip.position);
+        //Debug.DrawRay(ThisIkConstraint.data.tip.position, (LegLength + 0.1f) * -Context.RootTransform.up, Color.rebeccaPurple);
         ThisLegNormal = temp.normal; // zero if no hit
         ThisLegPoint = temp.point; // zero if no hit
+    }
+
+    public Vector3 RootToGround()
+    {
+        RaycastHit temp = GetStepPointRaycast(WaistToDownDist * rayDirNormal, ThisIkConstraint.data.root.position);
+        Vector3 tempDif = temp.point - ThisIkConstraint.data.root.position;
+        return tempDif;
     }
 
     public RaycastHit GetStepPointRaycast(Vector3 checkDirLength, Vector3 checkPosition) //single foot ray check
@@ -76,20 +89,34 @@ public class LegContext
         //behind is negative, infront positive
         Vector3 velNormal = Vector3.ProjectOnPlane(Context.Rb.linearVelocity + Context.RootTransform.forward * 0.1f, ThisLegNormal).normalized;
         Vector3 distance = comparePoint - Context.LegIkConstraint[ebodySide].data.root.position;
-        Vector3 flatDis = Vector3.ProjectOnPlane(distance,ThisLegNormal);
+        Vector3 flatDis = Vector3.ProjectOnPlane(distance, ThisLegNormal);
         float sign = Vector3.Dot(velNormal, Vector3.Project(distance.normalized,velNormal).normalized);
-        
         return flatDis.magnitude * sign;
     }
 
-    public Vector3 rootOnGroundPosition()
+    public Vector3 TranslateAdjustOnNormal(Vector3 point)
     {
-        //get floor directly below legs root
-        RaycastHit temp = GetStepPointRaycast((LegLength + 0.1f) * -Context.Rb.transform.up, ThisIkConstraint.data.root.position);
-        if (temp.normal != Vector3.zero)
-            return temp.point;
+        Vector3 rootToground = RootToGround();
+        float targetMag = Mathf.Cos(Vector3.Angle(rootToground, -ThisLegNormal)) * rootToground.magnitude; // a = cos() * h
+        Vector3 target = ThisIkConstraint.data.root.position - targetMag * ThisLegNormal; // calc third point on right triangle
+        Vector3 hitToTarget = target - (ThisIkConstraint.data.root.position + rootToground); // calc translation along ground plane
+        return point + hitToTarget; // apply translation
+    }
 
-        return Context.RootTransform.position; // return the tranforms position
+    public void RotationAdjust()
+    {
+        // move the set reference positions for start of stride when turning camera to remain behind camera
+        Quaternion adjustRot = Quaternion.FromToRotation(Vector3.ProjectOnPlane(Context.LastRootDir, startNormal), Vector3.ProjectOnPlane(Context.RootTransform.forward, startNormal));
+        referencePos = RotateAroundPoint(referencePos, Context.RootTransform.position, adjustRot);
+        startPos = RotateAroundPoint(startPos, Context.RootTransform.position, adjustRot);
+    }
+
+    public Vector3 RotateAroundPoint(Vector3 point, Vector3 pivot, Quaternion rotation)
+    {
+        Vector3 direction = point - pivot; 
+        Vector3 rotatedDirection = rotation * direction; 
+    
+        return pivot + rotatedDirection; 
     }
     
 }

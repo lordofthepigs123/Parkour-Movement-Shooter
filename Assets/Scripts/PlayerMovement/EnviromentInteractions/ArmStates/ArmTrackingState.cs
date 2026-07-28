@@ -32,6 +32,7 @@ public class ArmTrackingState : ArmState
         SetIkTarget(AContext.LockedPosition, AContext.LockedRotation);
         HoldIkTarget();
     }
+    public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
         return StateKey;

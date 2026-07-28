@@ -9,7 +9,7 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
         _side = side;
         _otherSide = otherSide;
 
-        LContext = new LegContext(_context, _side, _otherSide); 
+        LContext = new LegContext(this, _context, _side, _otherSide); 
         InitializeStates();
     }
 
@@ -33,7 +33,9 @@ public class LegStateMachine : StateManager<LegStateMachine.ELegState>
         States.Add(ELegState.Step, new LegStepState(LContext, ELegState.Step));
         States.Add(ELegState.BackStep, new LegBackStepState(LContext, ELegState.BackStep));
 
-        CurrentState = States[ELegState.AirSearch]; // Set first state
+         // Set first state
+        CurrentStateKey = ELegState.AirSearch;
+        CurrentState = States[CurrentStateKey];
     }
 
 /*

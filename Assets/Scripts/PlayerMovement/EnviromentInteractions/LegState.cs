@@ -53,8 +53,9 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
 
     private Vector3 CalculateStepRaycastDirLength()
     {
-        Vector3 rayDirLength = -CurrentNormal;
-        rayDirLength *= LContext.WaistToDownDist; //from waist to largest step down distance
+        //blend slope normal (high speed) and up vector
+        LContext.rayDirNormal = -Vector3.Lerp(Vector3.up + CurrentNormal * Co.NormalMinFac, CurrentNormal, Co.SpeedStrideRatio).normalized;
+        Vector3 rayDirLength = LContext.rayDirNormal * LContext.WaistToDownDist; //from waist to largest step down distance
         return rayDirLength;
     }
     

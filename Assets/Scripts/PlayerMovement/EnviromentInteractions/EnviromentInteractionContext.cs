@@ -18,6 +18,7 @@ public class EnviromentInteractionContext
     private Dictionary<EBodySide, Transform> _legTargetTransform = new Dictionary<EBodySide, Transform>();
     private Dictionary<EBodySide, Transform> _armTargetTransform = new Dictionary<EBodySide, Transform>();
     private MultiPositionConstraint _hipsConstraint;
+    private EnviromentInteractionStateMachine _eism;
     private Rigidbody _rb;
     private Collider _rootCollider;
     private Transform _rootTransform;
@@ -48,18 +49,23 @@ public class EnviromentInteractionContext
     private float _strechGive;
     private float _backRunDivisor;
     private float _maxAngleChange;
+    private float _breakMult;
+    private float _normalMinFac;
+    private float _slopeLowerMax;
 
     private RangedHandler _rh;
     private MeleeHandler _mh;
 
     //constructor
-    public EnviromentInteractionContext(MultiPositionConstraint hipsConstraint, TwoBoneIKConstraint leftLegIkConstraint, TwoBoneIKConstraint rightLegIkConstraint, TwoBoneIKConstraint leftArmIkConstraint, TwoBoneIKConstraint rightArmIkConstraint, Rigidbody rb,
+    public EnviromentInteractionContext(EnviromentInteractionStateMachine eism, MultiPositionConstraint hipsConstraint, TwoBoneIKConstraint leftLegIkConstraint, TwoBoneIKConstraint rightLegIkConstraint, TwoBoneIKConstraint leftArmIkConstraint, TwoBoneIKConstraint rightArmIkConstraint, Rigidbody rb,
     Collider rootCollider, Transform rootTransform, MainRagdollHandeler mr, LayerMask groundLayer, AnimationCurve strideBACCurve, AnimationCurve strideFWDCurve,
     AnimationCurve strideVelToDisCurve, AnimationCurve footLiftCurve, float maxVelocityMod, float strideDisFallVel, float maxStepDownDis, float placeOffsetDis,
     float resetDur, float resetDurMod, float ikEnterDur, float ikExitDur, float minCompleteRatio, AnimationCurve strideCurve, 
     AnimationCurve footRotCurve, AnimationCurve strideHeightCurve, float minCenterDisplacement, float speedLimiterThreshold, float stepDirThresholdBuf,
-    float smoothNormalMult, AnimationCurve hipDisToHeight, float hipBounceSmooth, float strechGive, float backRunDivisor, float maxAngleChange, RangedHandler rh, MeleeHandler mh)
+    float smoothNormalMult, AnimationCurve hipDisToHeight, float hipBounceSmooth, float strechGive, float backRunDivisor, float maxAngleChange, float breakMult, 
+    float normalMinFac, float slopeLowerMax, RangedHandler rh, MeleeHandler mh)
     {
+        _eism = eism;
         _rb = rb;
         _rootCollider = rootCollider;
         _rootTransform = rootTransform;
@@ -90,6 +96,9 @@ public class EnviromentInteractionContext
         _strechGive = strechGive;
         _backRunDivisor = backRunDivisor;
         _maxAngleChange = maxAngleChange;
+        _breakMult = breakMult;
+        _normalMinFac = normalMinFac;
+        _slopeLowerMax = slopeLowerMax;
 
         _rh = rh;
         _mh = mh;
@@ -131,10 +140,13 @@ public class EnviromentInteractionContext
     public Dictionary<EBodySide, Transform> LegTargetTransform => _legTargetTransform;
     public Dictionary<EBodySide, Transform> ArmTargetTransform => _armTargetTransform;
     public MultiPositionConstraint HipsConstraint => _hipsConstraint;
+    public EnviromentInteractionStateMachine Eism => _eism;
     public Rigidbody Rb => _rb;
     public Collider RootCollider => _rootCollider;
     public Transform RootTransform => _rootTransform;
     public MainRagdollHandeler Mr => _mr;
+    public PlayerColliderManager Cm => _mr.cm;
+    public PlayerStateMachine Sm => _mr.sm;
     public LayerMask GroundLayer => _groundLayer;
     public AnimationCurve StrideBACCurve => _strideBACCurve;
     public AnimationCurve StrideFWDCurve => _strideFWDCurve;
@@ -161,6 +173,9 @@ public class EnviromentInteractionContext
     public float StrechGive => _strechGive;
     public float BackRunDivisor => _backRunDivisor;
     public float MaxAngleChange => _maxAngleChange;
+    public float BreakMult => _breakMult;
+    public float NormalMinFac => _normalMinFac;
+    public float SlopeLowerMax => _slopeLowerMax;
     public RangedHandler Rh => _rh;
     public MeleeHandler Mh => _mh; 
 
@@ -173,10 +188,12 @@ public class EnviromentInteractionContext
     public Vector3 SmoothPlayerNormal {get; private set;}
     public Vector3 OriginalHipPos {get; private set;}
     public Quaternion OriginalHipRot {get; private set;}
+    public float SpeedStrideRatio {get; private set;}
     public float FrontalStride {get; private set;}
     public float BackStride {get; private set;}
     public float ToMoveDisStride {get; private set;}
     public float FootLiftMult {get; private set;}
+    public Vector3 LastRootDir {get; private set;}
     public EStepDir LastStepDir;
     public EBodySide LastStepSide;
     public Vector3 HipPos;
@@ -213,13 +230,18 @@ public class EnviromentInteractionContext
 
     public void CalculateStride()
     {
-        float tempRatio = Mathf.Clamp(SFlatVelocity().magnitude / MaxVelocityMod, 0, 1);
+        SpeedStrideRatio = Mathf.Clamp(SFlatVelocity().magnitude / MaxVelocityMod, 0, 1);
         //as speed increases overall stride length increase
         //but frontal(infront of player) stride decreases
-        FrontalStride = StrideFWDCurve.Evaluate(tempRatio);
+        FrontalStride = StrideFWDCurve.Evaluate(SpeedStrideRatio);
         //and back(bahind player) stride increases
-        BackStride = StrideBACCurve.Evaluate(tempRatio);
-        ToMoveDisStride = StrideVelToDisCurve.Evaluate(tempRatio);
-        FootLiftMult = FootLiftCurve.Evaluate(tempRatio);
+        BackStride = StrideBACCurve.Evaluate(SpeedStrideRatio);
+        ToMoveDisStride = StrideVelToDisCurve.Evaluate(SpeedStrideRatio);
+        FootLiftMult = FootLiftCurve.Evaluate(SpeedStrideRatio);
+    }
+
+    public void SaveLastRootDir()
+    {
+        LastRootDir = RootTransform.forward;
     }
 }

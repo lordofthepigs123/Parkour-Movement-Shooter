@@ -8,6 +8,8 @@ public abstract class StateManager<EState> : MonoBehaviour where EState : Enum
     protected Dictionary<EState, BaseState<EState>> States = new Dictionary<EState, BaseState<EState>>();
     protected BaseState<EState> CurrentState;
     protected bool IsTransitioningState = false;
+    public EState CurrentStateKey {get; protected set;}
+    protected EState nextStateKey;
 
     private void Start()
     {
@@ -16,7 +18,7 @@ public abstract class StateManager<EState> : MonoBehaviour where EState : Enum
 
     private void Update()
     {
-        EState nextStateKey = CurrentState.GetNextState();
+        nextStateKey = CurrentState.GetNextState();
 
         if (nextStateKey.Equals(CurrentState.StateKey) && !IsTransitioningState) // Run continous update of current state or transition to new
         {
@@ -28,10 +30,19 @@ public abstract class StateManager<EState> : MonoBehaviour where EState : Enum
         }
     }
 
+    private void LateUpdate()
+    {
+        if (CurrentState != null && nextStateKey.Equals(CurrentState.StateKey) && !IsTransitioningState)
+        {
+            CurrentState.LateUpdateState();
+        }
+    }
+
     public void TransitionToState(EState stateKey)
     {
         IsTransitioningState = true;
         CurrentState.ExitState(); // run state exit
+        CurrentStateKey = stateKey;
         CurrentState = States[stateKey];
         CurrentState.EnterState(); // run state enter
         IsTransitioningState = false;

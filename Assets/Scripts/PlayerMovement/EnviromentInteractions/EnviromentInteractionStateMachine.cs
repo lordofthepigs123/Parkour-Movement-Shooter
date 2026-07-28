@@ -60,17 +60,20 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private float _strechGive;
     [SerializeField] private float _backRunDivisor;
     [SerializeField] private float _maxAngleChange;
+    [SerializeField] private float _breakMult;
+    [SerializeField] private float _normalMinFac;
+    [SerializeField] private float _slopeLowerMax;
     [Header("Arm control")]
     [SerializeField] private RangedHandler _rh;
     [SerializeField] private MeleeHandler _mh;
 
     private void Start()
     {
-        _context = new EnviromentInteractionContext(_hipsConstraint, _leftLegIkConstraint, _rightLegIkConstraint, _leftArmIkConstraint, _rightArmIkConstraint, _rb, _rootCollider, _rootBodyTransform, _mr, _groundLayer,
+        _context = new EnviromentInteractionContext(this, _hipsConstraint, _leftLegIkConstraint, _rightLegIkConstraint, _leftArmIkConstraint, _rightArmIkConstraint, _rb, _rootCollider, _rootBodyTransform, _mr, _groundLayer,
         _strideBACCurve, _strideFWDCurve, _strideVelToDisCurve, _footLiftCurve, _maxVelocityMod, _strideDisFallVel,
         _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod, _ikEnterDur, _ikExitDur, _minCompleteRatio, _strideCurve,
         _footRotCurve, _strideHeightCurve, _minCenterDisplacement, _speedLimiterThreshold, _stepDirThresholdBuf, _smoothNormalMult, _hipDisToHeight, _hipBounceSmooth,
-        _strechGive, _backRunDivisor, _maxAngleChange, _rh, _mh);
+        _strechGive, _backRunDivisor, _maxAngleChange, _breakMult, _normalMinFac, _slopeLowerMax, _rh, _mh);
         
         //create new leg state machines and reference their context info
         _leftFootMac = gameObject.AddComponent<LegStateMachine>();
@@ -94,10 +97,11 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     private void InitializeStates() // Add States to inherited StateManager dictionary and set initial state
     {
         States.Add(EEnviromentInteractionState.Walk, new WalkState(_context, EEnviromentInteractionState.Walk));
-        //States.Add(EEnviromentInteractionState.Step, new WalkStepState(_context, EEnviromentInteractionState.Step)); # 
-        //States.Add(EEnviromentInteractionState.Reset, new WalkResetState(_context, EEnviromentInteractionState.Reset));
+        States.Add(EEnviromentInteractionState.Air, new AirState(_context, EEnviromentInteractionState.Air));
 
-        CurrentState = States[EEnviromentInteractionState.Walk]; // Set first state
+        // Set first state
+        CurrentStateKey = EEnviromentInteractionState.Air;
+        CurrentState = States[CurrentStateKey];
     }
 
 /*

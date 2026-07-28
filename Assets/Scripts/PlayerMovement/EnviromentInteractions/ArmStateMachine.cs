@@ -8,7 +8,7 @@ public class ArmStateMachine : StateManager<ArmStateMachine.EArmState>
         _side = side;
         _otherSide = otherSide;
 
-        AContext = new ArmContext(_context, _side, _otherSide); 
+        AContext = new ArmContext(this, _context, _side, _otherSide); 
         InitializeStates();
     }
 
@@ -28,6 +28,8 @@ public class ArmStateMachine : StateManager<ArmStateMachine.EArmState>
         States.Add(EArmState.Tracking, new ArmTrackingState(AContext, EArmState.Tracking));
         States.Add(EArmState.Free, new ArmFreeState(AContext, EArmState.Free));
 
-        CurrentState = States[EArmState.Tracking]; // Set first state
+        // Set first state
+        CurrentStateKey = EArmState.Tracking;
+        CurrentState = States[CurrentStateKey];
     }
 }

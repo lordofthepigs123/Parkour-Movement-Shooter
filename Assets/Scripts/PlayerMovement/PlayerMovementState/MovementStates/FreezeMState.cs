@@ -9,6 +9,7 @@ public class FreezeMState : PlayerMovementState
 
     public override void ExitState(){}
     public override void UpdateState(){}
+    public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
         return StateKey;

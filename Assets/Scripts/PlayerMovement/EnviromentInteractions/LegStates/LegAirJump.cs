@@ -2,11 +2,10 @@ using UnityEngine;
 using thisEState = LegStateMachine.ELegState; // shorthands
 using EEnviroment = EnviromentInteractionStateMachine.EEnviromentInteractionState;
 
-public class LegAirSearchState : LegState
-{
-    public LegAirSearchState(LegContext lContext, thisEState estate) : base(lContext, estate)
+public class LegAirJump : LegState
+{    public LegAirJump(LegContext lContext, thisEState estate) : base(lContext, estate)
     {
-
+        
     }
 
     public override void EnterState()
@@ -16,7 +15,7 @@ public class LegAirSearchState : LegState
     }
     public override void ExitState()
     {
-    
+
     }
     public override void UpdateState()
     {
@@ -30,11 +29,13 @@ public class LegAirSearchState : LegState
     public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
+        // transition to normal air state 
+
         //reset to walk
         if (Co.Eism.CurrentStateKey == EEnviroment.Walk)
         {
             SetIkTarget(LContext.ThisLegPoint, Quaternion.FromToRotation(Vector3.up,LContext.ThisLegNormal) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up)));
-            //Debug.Log("AirSearch -> Search");
+            //Debug.Log("AirJump -> Search");
             return thisEState.Search;
         }
         return StateKey;

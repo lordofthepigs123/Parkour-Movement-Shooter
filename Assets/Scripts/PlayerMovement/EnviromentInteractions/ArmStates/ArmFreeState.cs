@@ -21,6 +21,7 @@ public class ArmFreeState : ArmState
     {
         
     }
+    public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
         return StateKey;

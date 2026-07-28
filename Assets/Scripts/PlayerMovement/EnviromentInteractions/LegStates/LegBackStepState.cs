@@ -1,5 +1,6 @@
 using UnityEngine;
-using thisEState = LegStateMachine.ELegState; // shorthand
+using thisEState = LegStateMachine.ELegState; // shorthands
+using EEnviroment = EnviromentInteractionStateMachine.EEnviromentInteractionState;
 
 public class LegBackStepState : LegState
 {
@@ -35,25 +36,33 @@ public class LegBackStepState : LegState
     {
         LContext.FindLegNormal();//#more robust
         Co.CalculateStride();
-        //other leg can't step until this toe past center
-        LContext.ThisOppositeInvalidState[LContext.Side] = LContext.DistanceFromCenterFlat(LContext.ThisIkConstraint.data.tip.position, LContext.Side) < 0;
 
         //active estimate of final landing step point
         FindIkStepPosition(Co.BackStride);
+
+        //Adjust for player rotation
+        LContext.RotationAdjust();
 
         //find and set next IK target
         FindNextIkStridePosition();
         SetIkTarget(LContext.StridePos, LContext.StrideRotation); //#
         HoldIkTarget();
     }
+    public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
+        if (Co.Eism.CurrentStateKey ==  EEnviroment.Air)
+        {
+            //Debug.Log("Search -> AirSearch");
+            return thisEState.AirSearch;
+        }
+
         bool fullCycle = LContext.ActiveRatio > Co.MinCompleteRatio;
         bool hitStepPointValid = LContext.StepCol != null;
         if (fullCycle && hitStepPointValid)
         {
             //home in on contact position, frozen
-            Debug.Log("BackStep -> Search");
+            //Debug.Log("BackStep -> Search");
             return thisEState.Search;
         }
 
@@ -69,18 +78,25 @@ public class LegBackStepState : LegState
         if (float.IsNaN(progressRatio) || Co.ToMoveDisStride < 0.001f)
             progressRatio = 1;
         progressRatio = Mathf.Clamp(progressRatio, 0 , 1);
-        //Determine if current progressRatio speed is too fast compared to player velocity
-        float approxDis = FlatVelocity().magnitude * Co.SpeedLimiterThreshold * Time.deltaTime; // distance allowed to travel before modifying
-        float ratioDif = progressRatio - LContext.ActiveRatio;
-        float ratioDis = ratioDif * Co.ToMoveDisStride;
-        float distanceOvershoot = ratioDis - approxDis;
-        if (distanceOvershoot <= 0)
+        if (progressRatio > LContext.ActiveRatio) // initiate break if decreasing ratio
         {
-            LContext.ActiveRatio = progressRatio;
+            //Determine if current progressRatio speed is too fast compared to player velocity
+            float approxDis = FlatVelocity().magnitude * Co.SpeedLimiterThreshold * Time.deltaTime; // distance allowed to travel before modifying
+            float ratioDif = progressRatio - LContext.ActiveRatio;
+            float ratioDis = ratioDif * Co.ToMoveDisStride;
+            float distanceOvershoot = ratioDis - approxDis;
+            if (distanceOvershoot <= 0)
+            {
+                LContext.ActiveRatio = progressRatio;
+            }
+            else
+            { // clamp to removeovershoot (slows down speed)
+                LContext.ActiveRatio += approxDis / Co.ToMoveDisStride;
+            }
         }
         else
-        { // clamp to removeovershoot (slows down speed)
-            LContext.ActiveRatio += approxDis / Co.ToMoveDisStride;
+        { // legs break speed
+            LContext.ActiveRatio = Mathf.Lerp(LContext.ActiveRatio, 1, Co.BreakMult * Time.deltaTime);
         }
 
         Vector3 transitionNormal = Vector3.Lerp(LContext.startNormal, Co.StepNormal[LContext.Side], LContext.ActiveRatio).normalized; // Lerped normal between start surface and final
