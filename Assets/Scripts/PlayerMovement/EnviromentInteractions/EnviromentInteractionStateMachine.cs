@@ -27,6 +27,8 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private TwoBoneIKConstraint _rightLegIkConstraint;
     [SerializeField] private TwoBoneIKConstraint _leftArmIkConstraint;
     [SerializeField] private TwoBoneIKConstraint _rightArmIkConstraint;
+    [SerializeField] private Transform _fwdAirSearchReference;
+    [SerializeField] private Transform _bwdAirSearchReference;
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private Transform _rootBodyTransform;
     [SerializeField] private CapsuleCollider _rootCollider;
@@ -55,25 +57,35 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private float _speedLimiterThreshold;
     [SerializeField] private float _stepDirThresholdBuf;
     [SerializeField] private float _smoothNormalMult;
-    [SerializeField] private AnimationCurve _hipDisToHeight;
-    [SerializeField] private float _hipBounceSmooth;
     [SerializeField] private float _strechGive;
     [SerializeField] private float _backRunDivisor;
     [SerializeField] private float _maxAngleChange;
     [SerializeField] private float _breakMult;
     [SerializeField] private float _normalMinFac;
     [SerializeField] private float _slopeLowerMax;
+    [Header("Air control")]
+    [SerializeField] private AnimationCurve _airPosLerpCurve;
+    [SerializeField] private float _airRotLerpMult;
     [Header("Arm control")]
     [SerializeField] private RangedHandler _rh;
     [SerializeField] private MeleeHandler _mh;
+    [Header("Hip control")]
+    [SerializeField] private AnimationCurve _hipDisToHeight;
+    [SerializeField] private float _hipBounceSmooth;
+    [SerializeField] private float _hipPosSmooth;
+    [SerializeField] private float _hipLerpSmooth;
+    [SerializeField] private float _maxHipFlexVert;
+    [SerializeField] private float _maxHipFlexOff;
+    [SerializeField] private float _hipFlexMod;
+
 
     private void Start()
     {
-        _context = new EnviromentInteractionContext(this, _hipsConstraint, _leftLegIkConstraint, _rightLegIkConstraint, _leftArmIkConstraint, _rightArmIkConstraint, _rb, _rootCollider, _rootBodyTransform, _mr, _groundLayer,
+        _context = new EnviromentInteractionContext(this, _hipsConstraint, _leftLegIkConstraint, _rightLegIkConstraint, _leftArmIkConstraint, _rightArmIkConstraint, _fwdAirSearchReference, _bwdAirSearchReference, _rb, _rootCollider, _rootBodyTransform, _mr, _groundLayer,
         _strideBACCurve, _strideFWDCurve, _strideVelToDisCurve, _footLiftCurve, _maxVelocityMod, _strideDisFallVel,
         _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod, _ikEnterDur, _ikExitDur, _minCompleteRatio, _strideCurve,
-        _footRotCurve, _strideHeightCurve, _minCenterDisplacement, _speedLimiterThreshold, _stepDirThresholdBuf, _smoothNormalMult, _hipDisToHeight, _hipBounceSmooth,
-        _strechGive, _backRunDivisor, _maxAngleChange, _breakMult, _normalMinFac, _slopeLowerMax, _rh, _mh);
+        _footRotCurve, _strideHeightCurve, _minCenterDisplacement, _speedLimiterThreshold, _stepDirThresholdBuf, _smoothNormalMult, _hipDisToHeight, _hipBounceSmooth, _hipPosSmooth, _hipLerpSmooth,
+        _strechGive, _backRunDivisor, _maxAngleChange, _breakMult, _normalMinFac, _slopeLowerMax, _airPosLerpCurve, _airRotLerpMult, _maxHipFlexVert, _maxHipFlexOff, _hipFlexMod, _rh, _mh);
         
         //create new leg state machines and reference their context info
         _leftFootMac = gameObject.AddComponent<LegStateMachine>();

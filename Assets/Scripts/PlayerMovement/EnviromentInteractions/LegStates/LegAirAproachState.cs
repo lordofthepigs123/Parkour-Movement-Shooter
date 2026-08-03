@@ -2,19 +2,16 @@ using UnityEngine;
 using thisEState = LegStateMachine.ELegState; // shorthands
 using EEnviroment = EnviromentInteractionStateMachine.EEnviromentInteractionState;
 
-public class LegAirSearchState : LegState
+public class LegAirAproachState : LegState
 {
-    public LegAirSearchState(LegContext lContext, thisEState estate) : base(lContext, estate)
+    public LegAirAproachState(LegContext lContext, thisEState estate) : base(lContext, estate)
     {
 
     }
 
     public override void EnterState()
     {
-        //decide front leg
-        LContext.AirFrontLeg = (Co.LastStepDir == EnviromentInteractionContext.EStepDir.FORWARD && Co.LastStepSide == LContext.Side) || (Co.LastStepDir == EnviromentInteractionContext.EStepDir.BACKWARD && Co.LastStepSide != LContext.Side);
-        LContext.LocalAirPos = Co.RootTransform.InverseTransformPoint(LContext.StridePos); // Preset local position of target
-        SetDesiLocalPos(); // save air reference local position 
+
     }
     public override void ExitState()
     {
@@ -40,13 +37,6 @@ public class LegAirSearchState : LegState
             //Debug.Log("AirSearch -> Search");
             return thisEState.Search;
         }
-
-        //near obstacle aproach
-        bool conditions = false;
-        if (conditions)
-        {
-            return thisEState.AirAproach;
-        }
         return StateKey;
     }
 
@@ -65,31 +55,5 @@ public class LegAirSearchState : LegState
         Quaternion desiRot = Quaternion.FromToRotation(Vector3.up, LContext.ThisIkConstraint.data.mid.forward) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up)); // foot perpendicular to shin
         float angleDif = Vector3.Angle(LContext.ThisIkConstraint.data.mid.forward, LContext.StrideRotation * Vector3.forward) / 180;
         LContext.StrideRotation = Quaternion.Lerp(LContext.StrideRotation, desiRot, Time.deltaTime * Mathf.Pow(angleDif, 1 / Co.AirRotLerpMult) * Co.AirRotLerpMult);
-    }
-
-    private void SetDesiLocalPos()
-    {
-        //find neutral position
-        Vector3 desiPos;
-        if (LContext.AirFrontLeg) // apply which leg has frontal position after jump
-        {
-            desiPos = Co.FwdAirSearchReference.position;
-            if (LContext.Side == EnviromentInteractionContext.EBodySide.LEFT)
-                desiPos = BodySideReflect(desiPos);
-        }
-        else
-        {
-            desiPos = Co.BwdAirSearchReference.position;
-            if (LContext.Side == EnviromentInteractionContext.EBodySide.RIGHT)
-                desiPos = BodySideReflect(desiPos);
-        }
-
-        LContext.DesiLocalAirPos = Co.RootTransform.InverseTransformPoint(desiPos); // make local
-    }
-
-    private Vector3 BodySideReflect(Vector3 pos)
-    {
-        Vector3 perpenDis = Vector3.Project(Co.RootTransform.position - pos, Co.RootTransform.right);
-        return pos + perpenDis * 2;
     }
 }

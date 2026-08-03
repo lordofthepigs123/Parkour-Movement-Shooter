@@ -53,6 +53,8 @@ public class LegContext
     public Vector3 LockedPosition; //target postion on current frame
     public Quaternion LockedRotation;
     public bool AirFrontLeg;
+    public Vector3 LocalAirPos; //Position of target while in air that tracks body
+    public Vector3 DesiLocalAirPos;
 
     public float ActiveRatio;
 

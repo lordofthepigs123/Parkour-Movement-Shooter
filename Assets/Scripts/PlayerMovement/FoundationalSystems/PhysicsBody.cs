@@ -36,6 +36,7 @@ public class PhysicsBody : MonoBehaviour
     private Vector3 fplayer_right;
     private Vector3 fplayer_up;
     private Vector3 air_reactF;
+    private Vector3 lastVel = Vector3.zero;
 
     protected void movementForces(float strength) // forces to point vector of up and vector of desi in same dir
     {
@@ -332,5 +333,12 @@ public class PhysicsBody : MonoBehaviour
         twist = new Quaternion(p.x, p.y, p.z, q.w);
         twist = twist.normalized;
         swing = q * Quaternion.Inverse(twist);
+    }
+
+    protected Vector3 CalcRbNetAccel(float timeStep)
+    {
+        Vector3 accel = (rb.linearVelocity - lastVel) / timeStep;
+        lastVel = rb.linearVelocity;
+        return accel;
     }
 }

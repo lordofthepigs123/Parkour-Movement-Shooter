@@ -519,7 +519,7 @@ public class WallRunning : MonoBehaviour
 
         //stick forces
         Vector3 stickForce = -_wallNormal * (1 + Vector3.Dot(Vector3.up, _wallNormal) * stickAngleMult * (1 - resultingStrengthMult)) * wallStickForce;
-        if (rh.angularDif > minAngleDif)
+        if (rh.AngularDif > minAngleDif)
             stickForce += stickAntiTorque();
         netForce += stickForce;
 

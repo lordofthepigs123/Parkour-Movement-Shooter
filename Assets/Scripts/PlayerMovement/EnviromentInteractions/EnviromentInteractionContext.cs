@@ -19,6 +19,8 @@ public class EnviromentInteractionContext
     private Dictionary<EBodySide, Transform> _armTargetTransform = new Dictionary<EBodySide, Transform>();
     private MultiPositionConstraint _hipsConstraint;
     private EnviromentInteractionStateMachine _eism;
+    private Transform _fwdAirSearchReference;
+    private Transform _bwdAirSearchReference;
     private Rigidbody _rb;
     private Collider _rootCollider;
     private Transform _rootTransform;
@@ -46,24 +48,32 @@ public class EnviromentInteractionContext
     private float _smoothNormalMult;
     private AnimationCurve _hipDisToHeight;
     private float _hipBounceSmooth;
+    private float _hipPosSmooth;
+    private float _hipLerpSmooth;
     private float _strechGive;
     private float _backRunDivisor;
     private float _maxAngleChange;
     private float _breakMult;
     private float _normalMinFac;
     private float _slopeLowerMax;
+    private AnimationCurve _airPosLerpCurve;
+    private float _airRotLerpMult;
+    private float _maxHipFlexVert;
+    private float _maxHipFlexOff;
+    private float _hipFlexMod;
 
     private RangedHandler _rh;
     private MeleeHandler _mh;
 
     //constructor
-    public EnviromentInteractionContext(EnviromentInteractionStateMachine eism, MultiPositionConstraint hipsConstraint, TwoBoneIKConstraint leftLegIkConstraint, TwoBoneIKConstraint rightLegIkConstraint, TwoBoneIKConstraint leftArmIkConstraint, TwoBoneIKConstraint rightArmIkConstraint, Rigidbody rb,
+    public EnviromentInteractionContext(EnviromentInteractionStateMachine eism, MultiPositionConstraint hipsConstraint, TwoBoneIKConstraint leftLegIkConstraint, TwoBoneIKConstraint rightLegIkConstraint, TwoBoneIKConstraint leftArmIkConstraint, TwoBoneIKConstraint rightArmIkConstraint, Transform fwdAirSearchReference, Transform bwdAirSearchReference, Rigidbody rb,
     Collider rootCollider, Transform rootTransform, MainRagdollHandeler mr, LayerMask groundLayer, AnimationCurve strideBACCurve, AnimationCurve strideFWDCurve,
     AnimationCurve strideVelToDisCurve, AnimationCurve footLiftCurve, float maxVelocityMod, float strideDisFallVel, float maxStepDownDis, float placeOffsetDis,
     float resetDur, float resetDurMod, float ikEnterDur, float ikExitDur, float minCompleteRatio, AnimationCurve strideCurve, 
     AnimationCurve footRotCurve, AnimationCurve strideHeightCurve, float minCenterDisplacement, float speedLimiterThreshold, float stepDirThresholdBuf,
-    float smoothNormalMult, AnimationCurve hipDisToHeight, float hipBounceSmooth, float strechGive, float backRunDivisor, float maxAngleChange, float breakMult, 
-    float normalMinFac, float slopeLowerMax, RangedHandler rh, MeleeHandler mh)
+    float smoothNormalMult, AnimationCurve hipDisToHeight, float hipBounceSmooth, float hipPosSmooth, float hipLerpSmooth, float strechGive, float backRunDivisor, float maxAngleChange, float breakMult, 
+    float normalMinFac, float slopeLowerMax, AnimationCurve airPosLerpCurve, float airRotLerpMult, float maxHipFlexVert, float maxHipFlexOff, float hipFlexMod,
+    RangedHandler rh, MeleeHandler mh)
     {
         _eism = eism;
         _rb = rb;
@@ -93,12 +103,19 @@ public class EnviromentInteractionContext
         _smoothNormalMult = smoothNormalMult;
         _hipDisToHeight = hipDisToHeight;
         _hipBounceSmooth = hipBounceSmooth;
+        _hipPosSmooth = hipPosSmooth;
+        _hipLerpSmooth = hipLerpSmooth;
         _strechGive = strechGive;
         _backRunDivisor = backRunDivisor;
         _maxAngleChange = maxAngleChange;
         _breakMult = breakMult;
         _normalMinFac = normalMinFac;
         _slopeLowerMax = slopeLowerMax;
+        _airPosLerpCurve = airPosLerpCurve;
+        _airRotLerpMult = airRotLerpMult;
+        _maxHipFlexVert = maxHipFlexVert;
+        _maxHipFlexOff = maxHipFlexOff;
+        _hipFlexMod = hipFlexMod;
 
         _rh = rh;
         _mh = mh;
@@ -124,6 +141,9 @@ public class EnviromentInteractionContext
         StaticNormal.Add(EBodySide.LEFT, Vector3.zero);
         StaticNormal.Add(EBodySide.RIGHT, Vector3.zero);
 
+        _fwdAirSearchReference = fwdAirSearchReference;
+        _bwdAirSearchReference = bwdAirSearchReference;
+
         LastStepDir = EStepDir.FORWARD;//Default
 
         //arms
@@ -141,6 +161,8 @@ public class EnviromentInteractionContext
     public Dictionary<EBodySide, Transform> ArmTargetTransform => _armTargetTransform;
     public MultiPositionConstraint HipsConstraint => _hipsConstraint;
     public EnviromentInteractionStateMachine Eism => _eism;
+    public Transform FwdAirSearchReference => _fwdAirSearchReference;
+    public Transform BwdAirSearchReference => _bwdAirSearchReference;
     public Rigidbody Rb => _rb;
     public Collider RootCollider => _rootCollider;
     public Transform RootTransform => _rootTransform;
@@ -170,12 +192,19 @@ public class EnviromentInteractionContext
     public float SmoothNormalMult => _smoothNormalMult;
     public AnimationCurve HipDisToHeight => _hipDisToHeight;
     public float HipBounceSmooth => _hipBounceSmooth;
+    public float HipPosSmooth => _hipPosSmooth;
+    public float HipLerpSmooth => _hipLerpSmooth;
     public float StrechGive => _strechGive;
     public float BackRunDivisor => _backRunDivisor;
     public float MaxAngleChange => _maxAngleChange;
     public float BreakMult => _breakMult;
     public float NormalMinFac => _normalMinFac;
     public float SlopeLowerMax => _slopeLowerMax;
+    public AnimationCurve AirPosLerpCurve => _airPosLerpCurve;
+    public float AirRotLerpMult => _airRotLerpMult;
+    public float MaxHipFlexVert => _maxHipFlexVert;
+    public float MaxHipFlexOff => _maxHipFlexOff;
+    public float HipFlexMod => _hipFlexMod;
     public RangedHandler Rh => _rh;
     public MeleeHandler Mh => _mh; 
 
@@ -198,6 +227,10 @@ public class EnviromentInteractionContext
     public EBodySide LastStepSide;
     public Vector3 HipPos;
     public Vector3 HipNormal;
+    public float LastDif;
+    public Vector3 LerpOffset;
+    public Vector3 AccelOffset;
+    public Vector3 BounceOffset;
     public Vector3 LockedHipPosition; //target postion on current frame
     public Quaternion LockedHipRotation;
 

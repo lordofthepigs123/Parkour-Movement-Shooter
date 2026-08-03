@@ -231,10 +231,12 @@ public class GrabEdgeDetector : MonoBehaviour
             Vector3 n2 = calcNormal(i + 1, edgeTriangles);
 
             //Debug
+            /*
             Vector3 pos1 = (combinedVert[closeTri[edgeTriangles[i] * 3]] + combinedVert[closeTri[edgeTriangles[i] * 3 + 1]] + combinedVert[closeTri[edgeTriangles[i] * 3 + 2]]) / 3;
             Vector3 pos2 = (combinedVert[closeTri[edgeTriangles[i + 1] * 3]] + combinedVert[closeTri[edgeTriangles[i + 1] * 3 + 1]] + combinedVert[closeTri[edgeTriangles[i + 1] * 3 + 2]]) / 3;
             Debug.DrawRay(pos1, n1 * 3, Color.aquamarine);
             Debug.DrawRay(pos2 , n2 * 3, Color.darkOrange);
+            */
             //End Debug
 
 

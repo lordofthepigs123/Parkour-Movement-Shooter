@@ -22,8 +22,9 @@ public class MainRagdollHandeler : PhysicsBody
     [SerializeField] float percentMod;
     [SerializeField] float degreeMax; // degrees 0 - 90
     [SerializeField] float deflectionMult;
-    public float angularSet;
-    [HideInInspector] public float angularDif;
+    public float AngularSet;
+    [HideInInspector] public float AngularDif;
+    [HideInInspector] public Vector3 FixedRbNetAccel {get; private set;}
 
     [Header("Components")]
     private PlayerMovement pm;
@@ -45,16 +46,18 @@ public class MainRagdollHandeler : PhysicsBody
         ih = GetComponent<InputHandler>();
         hh = GetComponent<HeatHandler>();
         rb.freezeRotation = false; //enabled full rb ragdoll
-        rb.maxAngularVelocity = angularSet;
+        rb.maxAngularVelocity = AngularSet;
     }
 
     private void Update()
     {
-        angularDif = Vector3.Angle(desiRotation * Vector3.up, transform.up);
+        AngularDif = Vector3.Angle(desiRotation * Vector3.up, transform.up);
     }
 
     private void FixedUpdate()
     {
+        //
+        FixedRbNetAccel = CalcRbNetAccel(Time.fixedDeltaTime);
         //
         if (sm.CurrentStateKey == PlayerStateMachine.EMovementState.wedgegrabing)
         {

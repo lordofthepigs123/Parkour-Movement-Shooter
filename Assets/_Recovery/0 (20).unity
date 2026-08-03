@@ -16275,73 +16275,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 589333707}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &590577301
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 590577302}
-  - component: {fileID: 590577304}
-  - component: {fileID: 590577303}
-  m_Layer: 0
-  m_Name: Right_FootDetector
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &590577302
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 590577301}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.3597274, y: -0.015706044, z: 0.040693644, w: 0.93203735}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1518129161}
-  m_LocalEulerAnglesHint: {x: 42.209, y: 0, z: 5}
---- !u!114 &590577303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 590577301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 521825c65170d48a4a8bff12f54b6332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Asm_FoundationalSystems::FootDetectorHandler
-  cam: {fileID: 841594846}
---- !u!65 &590577304
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 590577301}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.5, y: 7, z: 1.5}
-  m_Center: {x: 0, y: -2.5, z: 0}
 --- !u!4 &591959776 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6096609811050603178, guid: 1304363dea57e45418cfd9889d23f120, type: 3}
@@ -29177,9 +29110,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1145783792}
   - component: {fileID: 1145783793}
-  - component: {fileID: 1145783794}
   m_Layer: 0
-  m_Name: Left_FootDetector
+  m_Name: FootDetector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29193,13 +29125,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1145783791}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3597291, y: 0.015706472, z: -0.04069401, w: 0.93203664}
+  m_LocalRotation: {x: 0.91423273, y: 0, z: 0, w: 0.40518954}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1520755672}
-  m_LocalEulerAnglesHint: {x: 42.209, y: 0, z: -5}
+  m_LocalEulerAnglesHint: {x: 132.194, y: 0, z: 0}
 --- !u!65 &1145783793
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -29220,20 +29152,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1.5, y: 7, z: 1.5}
-  m_Center: {x: 0, y: -2.5, z: 0}
---- !u!114 &1145783794
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1145783791}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 521825c65170d48a4a8bff12f54b6332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Asm_FoundationalSystems::FootDetectorHandler
-  cam: {fileID: 841594846}
+  m_Center: {x: 0, y: -2.3, z: 0}
 --- !u!1 &1155042719
 GameObject:
   m_ObjectHideFlags: 0
@@ -41046,8 +40965,7 @@ Transform:
   m_LocalPosition: {x: 0.117395245, y: 0.08240513, z: -0.017358921}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 590577302}
+  m_Children: []
   m_Father: {fileID: 1495376982}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1520755671
