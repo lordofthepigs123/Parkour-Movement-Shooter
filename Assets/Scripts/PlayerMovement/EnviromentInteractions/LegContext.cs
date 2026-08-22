@@ -23,6 +23,7 @@ public class LegContext
         _thisLegTransform = Context.LegTransform[Side];
         _thisTargetTransform = Context.LegTargetTransform[Side];
         _legLength = CalculatelegLength();
+        Context.LegLength = _legLength;
         OriginalFootRot = _thisIkConstraint.data.tip.rotation;
     }
     //read only
@@ -52,9 +53,15 @@ public class LegContext
     public bool StrideInAir;
     public Vector3 LockedPosition; //target postion on current frame
     public Quaternion LockedRotation;
-    public bool AirFrontLeg;
+    public enum FrontLeg
+    {
+        TRUE,
+        FLASE,
+        UNSET
+    }
+    public FrontLeg AirFrontLeg;
     public Vector3 LocalAirPos; //Position of target while in air that tracks body
-    public Vector3 DesiLocalAirPos;
+    public Vector3 OGLocalAirPos;
 
     public float ActiveRatio;
 
@@ -65,8 +72,8 @@ public class LegContext
 
     public void FindLegNormal()
     {
-        RaycastHit temp = GetStepPointRaycast((LegLength + 0.1f) * -Context.RootTransform.up, ThisIkConstraint.data.tip.position);
-        //Debug.DrawRay(ThisIkConstraint.data.tip.position, (LegLength + 0.1f) * -Context.RootTransform.up, Color.rebeccaPurple);
+        RaycastHit temp = GetStepPointRaycast(WaistToDownDist * -Context.RootTransform.up, ThisIkConstraint.data.tip.position);
+        //Debug.DrawRay(ThisIkConstraint.data.tip.position, WaistToDownDist * -Context.RootTransform.up, Color.rebeccaPurple);
         ThisLegNormal = temp.normal; // zero if no hit
         ThisLegPoint = temp.point; // zero if no hit
     }

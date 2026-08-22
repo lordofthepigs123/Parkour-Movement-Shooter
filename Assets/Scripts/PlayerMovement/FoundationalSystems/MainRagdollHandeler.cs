@@ -1,6 +1,4 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.Splines.Interpolators;
 
 public class MainRagdollHandeler : PhysicsBody
 {
@@ -21,10 +19,13 @@ public class MainRagdollHandeler : PhysicsBody
     [SerializeField] float spreadMult;
     [SerializeField] float percentMod;
     [SerializeField] float degreeMax; // degrees 0 - 90
+    [SerializeField] float legDirectionStrength;
     [SerializeField] float deflectionMult;
     public float AngularSet;
+
     [HideInInspector] public float AngularDif;
     [HideInInspector] public Vector3 FixedRbNetAccel {get; private set;}
+    [HideInInspector] public Vector3 GeneralLegDirection;
 
     [Header("Components")]
     private PlayerMovement pm;
@@ -32,6 +33,7 @@ public class MainRagdollHandeler : PhysicsBody
     private PlayerGrind pg;
     [HideInInspector] public PlayerStateMachine sm;
     [HideInInspector] public PlayerColliderManager cm;
+    [HideInInspector] public Transform Cam => cam;
     private HeatHandler hh;
     [SerializeField] private Transform bodyDirection;
     private void Start()
@@ -47,6 +49,7 @@ public class MainRagdollHandeler : PhysicsBody
         hh = GetComponent<HeatHandler>();
         rb.freezeRotation = false; //enabled full rb ragdoll
         rb.maxAngularVelocity = AngularSet;
+        GeneralLegDirection = Vector3.zero;
     }
 
     private void Update()
@@ -192,13 +195,24 @@ public class MainRagdollHandeler : PhysicsBody
         //
         else if (sm.CurrentStateKey == PlayerStateMachine.EMovementState.air)
         {
+            // GeneralLegDirection 
             spdMult_ang = baseSpdAng;
             angFriction = 0;
+
+            Quaternion tempRot;
+            // tilt towards velocity
             float tempYvel = rb.linearVelocity.y / spreadMult;
-            float deflectionMult = rb.linearVelocity.magnitude / spreadMult * (2 * tempYvel / (Mathf.Pow(tempYvel, 2) + 1));
+            float deflectionMult = rb.linearVelocity.magnitude / spreadMult * (2 * tempYvel / (Mathf.Pow(tempYvel, 2) + 1)); // when y negative, negative
             float mixDegree = 2 / (1 + Mathf.Pow(1 + 1 / percentMod, -deflectionMult)) - 1;
-            Vector3 velCross = Vector3.Cross(rb.linearVelocity, Vector3.up);
-            desiRotation = Quaternion.AngleAxis(-mixDegree * degreeMax, velCross) * orientation.rotation;
+            Vector3 velCross = Vector3.Cross(rb.linearVelocity, Vector3.up); // axis to rotate around
+            tempRot = Quaternion.AngleAxis(-mixDegree * degreeMax, velCross);
+
+            // merge with GeneralLegDirection
+            Vector3 mergedDirection = tempRot * Vector3.up - GeneralLegDirection * legDirectionStrength;
+
+            //apply
+            tempRot = Quaternion.FromToRotation(Vector3.up, mergedDirection) * orientation.rotation;
+            desiRotation = tempRot;
             //Debug.DrawRay(rb.worldCenterOfMass, Quaternion.AngleAxis(mixDegree * degreeMax, velCross) * Vector3.up * 3, Color.maroon);
             movementForces(0.2f);
         }

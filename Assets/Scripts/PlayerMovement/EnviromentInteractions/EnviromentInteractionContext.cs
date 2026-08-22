@@ -56,8 +56,18 @@ public class EnviromentInteractionContext
     private float _breakMult;
     private float _normalMinFac;
     private float _slopeLowerMax;
+    private float _footLength;
+    private FootDetectManager _fd;
     private AnimationCurve _airPosLerpCurve;
+    private AnimationCurve _airDisLegExtendCurve;
+    private float _timeCap;
     private float _airRotLerpMult;
+    private float _airHipMaxRepelDis;
+    private float _airHipRepelMult;
+    private float _airTipMaxRepelDis;
+    private float _airTipRepelMult;
+    private float _posLerpSpeedMod;
+    private float _airFootAngleMult;
     private float _maxHipFlexVert;
     private float _maxHipFlexOff;
     private float _hipFlexMod;
@@ -72,8 +82,8 @@ public class EnviromentInteractionContext
     float resetDur, float resetDurMod, float ikEnterDur, float ikExitDur, float minCompleteRatio, AnimationCurve strideCurve, 
     AnimationCurve footRotCurve, AnimationCurve strideHeightCurve, float minCenterDisplacement, float speedLimiterThreshold, float stepDirThresholdBuf,
     float smoothNormalMult, AnimationCurve hipDisToHeight, float hipBounceSmooth, float hipPosSmooth, float hipLerpSmooth, float strechGive, float backRunDivisor, float maxAngleChange, float breakMult, 
-    float normalMinFac, float slopeLowerMax, AnimationCurve airPosLerpCurve, float airRotLerpMult, float maxHipFlexVert, float maxHipFlexOff, float hipFlexMod,
-    RangedHandler rh, MeleeHandler mh)
+    float normalMinFac, float slopeLowerMax, float footLength, FootDetectManager fd, AnimationCurve airPosLerpCurve, AnimationCurve airDisLegExtendCurve, float timeCap, float airRotLerpMult, float airHipMaxRepelDis, 
+    float airHipRepelMult, float airTipMaxRepelDis, float airTipRepelMult, float posLerpSpeedMod, float airFootAngleMult, float maxHipFlexVert, float maxHipFlexOff, float hipFlexMod, RangedHandler rh, MeleeHandler mh)
     {
         _eism = eism;
         _rb = rb;
@@ -111,8 +121,18 @@ public class EnviromentInteractionContext
         _breakMult = breakMult;
         _normalMinFac = normalMinFac;
         _slopeLowerMax = slopeLowerMax;
+        _footLength = footLength;
+        _fd = fd;
         _airPosLerpCurve = airPosLerpCurve;
+        _airDisLegExtendCurve = airDisLegExtendCurve;
+        _timeCap = timeCap;
         _airRotLerpMult = airRotLerpMult;
+        _airHipMaxRepelDis = airHipMaxRepelDis;
+        _airHipRepelMult = airHipRepelMult;
+        _airTipMaxRepelDis = airTipMaxRepelDis;
+        _airTipRepelMult = airTipRepelMult;
+        _posLerpSpeedMod = posLerpSpeedMod;
+        _airFootAngleMult = airFootAngleMult;
         _maxHipFlexVert = maxHipFlexVert;
         _maxHipFlexOff = maxHipFlexOff;
         _hipFlexMod = hipFlexMod;
@@ -144,6 +164,12 @@ public class EnviromentInteractionContext
         _fwdAirSearchReference = fwdAirSearchReference;
         _bwdAirSearchReference = bwdAirSearchReference;
 
+        LocalDesiStore.Add(EBodySide.LEFT, Vector3.zero);
+        LocalDesiStore.Add(EBodySide.RIGHT, Vector3.zero);
+        
+        //TrackPoint.Add(EBodySide.LEFT, () => Fd.Left_trackPoint);
+        //TrackPoint.Add(EBodySide.RIGHT, () => Fd.Right_trackPoint);
+
         LastStepDir = EStepDir.FORWARD;//Default
 
         //arms
@@ -159,6 +185,7 @@ public class EnviromentInteractionContext
     public Dictionary<EBodySide, Transform> LegTransform => _legTransform;//hip
     public Dictionary<EBodySide, Transform> LegTargetTransform => _legTargetTransform;
     public Dictionary<EBodySide, Transform> ArmTargetTransform => _armTargetTransform;
+    //public Dictionary<EBodySide, Func<Vector3>> TrackPoint = new Dictionary<EBodySide, Func<Vector3>>();
     public MultiPositionConstraint HipsConstraint => _hipsConstraint;
     public EnviromentInteractionStateMachine Eism => _eism;
     public Transform FwdAirSearchReference => _fwdAirSearchReference;
@@ -200,8 +227,21 @@ public class EnviromentInteractionContext
     public float BreakMult => _breakMult;
     public float NormalMinFac => _normalMinFac;
     public float SlopeLowerMax => _slopeLowerMax;
+    public float FootLength => _footLength;
+    public FootDetectManager Fd => _fd;
+    public Vector3 TrackPoint => Fd.TrackPoint;
+    public float TrackDot => Fd.TrackDot;
+    public bool Tracking => Fd.Tracking;
     public AnimationCurve AirPosLerpCurve => _airPosLerpCurve;
+    public AnimationCurve AirDisLegExtendCurve => _airDisLegExtendCurve;
+    public float TimeCap => _timeCap;
     public float AirRotLerpMult => _airRotLerpMult;
+    public float AirHipMaxRepelDis => _airHipMaxRepelDis;
+    public float AirHipRepelMult => _airHipRepelMult;
+    public float AirTipMaxRepelDis => _airTipMaxRepelDis;
+    public float AirTipRepelMult => _airTipRepelMult;
+    public float PosLerpSpeedMod => _posLerpSpeedMod;
+    public float AirFootAngleMult => _airFootAngleMult;
     public float MaxHipFlexVert => _maxHipFlexVert;
     public float MaxHipFlexOff => _maxHipFlexOff;
     public float HipFlexMod => _hipFlexMod;
@@ -212,11 +252,13 @@ public class EnviromentInteractionContext
     public Dictionary<EBodySide, bool> OppositeInvalidState = new Dictionary<EBodySide, bool>();
     public Dictionary<EBodySide, Vector3> StepNormal = new Dictionary<EBodySide, Vector3>(); // active normal of predicted step pos
     public Dictionary<EBodySide, Vector3> StaticNormal = new Dictionary<EBodySide, Vector3>(); // non zero when foot is locked on ground
+    public Dictionary<EBodySide, Vector3> LocalDesiStore = new Dictionary<EBodySide, Vector3>();
     public enum EStepDir {FORWARD, BACKWARD}
     public Vector3 InstantPlayerNormal {get; private set;}
     public Vector3 SmoothPlayerNormal {get; private set;}
     public Vector3 OriginalHipPos {get; private set;}
     public Quaternion OriginalHipRot {get; private set;}
+    public float LegLength;
     public float SpeedStrideRatio {get; private set;}
     public float FrontalStride {get; private set;}
     public float BackStride {get; private set;}

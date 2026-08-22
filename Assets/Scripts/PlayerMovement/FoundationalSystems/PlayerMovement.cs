@@ -159,7 +159,7 @@ public class PlayerMovement : MonoBehaviour
         if (rb.angularVelocity.magnitude > minAngVel)
         {
             float push = getAngularPush(cm.wallNormal, -transform.up, cm.lowesPoint) * angBoostMult;
-            Debug.Log(push);
+            //Debug.Log(push);
             push = maxAngBoost * (1 - Mathf.Pow((float)System.Math.E, -push / maxAngBoost)); // slow as aproach max
             netforce += cm.wallNormal * push;
         }

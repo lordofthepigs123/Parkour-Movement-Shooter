@@ -44,14 +44,13 @@ public class LegStepState : LegState
     public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
-        if (Co.Eism.CurrentStateKey == EEnviroment.Air)
+        if (Co.Eism.CurrentStateKey == EEnviroment.Air || LContext.StrideInAir)
         {
+            WalkToAirExitChecks();
             if (Co.LastStepSide != LContext.Side)
             {
-                //Debug.Log("Search -> AirJump");
                 return thisEState.AirJump;
             }
-            //Debug.Log("Search -> AirSearch");
             return thisEState.AirSearch;
         }
 
@@ -60,7 +59,6 @@ public class LegStepState : LegState
         if (fullCycle && hitStepPointValid)
         {
             //home in on contact position, frozen
-            //Debug.Log("Step -> Search");
             LContext.StridePos = LContext.StepPos;//lock in to final pos and rot
             LContext.StrideRotation = Quaternion.FromToRotation(Vector3.up,Co.StepNormal[LContext.Side]) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
             SetIkTarget(LContext.StridePos, LContext.StrideRotation); //#

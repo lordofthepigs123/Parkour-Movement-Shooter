@@ -50,7 +50,7 @@ public class WallBounce : MonoBehaviour
         {
             foreach (ContactPoint contact in collision.contacts)
             {
-                if (collision.gameObject.layer == Mathf.Log(bounceSurface.value, 2))
+                if ((bounceSurface.value & (1 << collision.gameObject.layer)) != 0)
                 {
                     hasCollided = true;
                     Vector3 temp = contact.point - transform.position;

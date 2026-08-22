@@ -30,7 +30,6 @@ public class WalkState : EnviromentInteractionState
         if (Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.air)
         {
             //when ungrounding or jumping
-            Debug.Log("Walk -> Air");
             return thisEState.Air;
         }
 

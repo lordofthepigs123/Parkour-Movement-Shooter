@@ -1,19 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GrabEdgeDetector : MonoBehaviour
+public class GrabEdgeDetector : TriggerDetector
 {
     [Header("GrabEdgeDetector")]
-    public LayerMask whatIsEdgeable;
     [SerializeField] Collider checkCol; 
     [SerializeField] Transform checkFromPos;
     [SerializeField] float checkFromMaxDis;
     [SerializeField] float triangleNunLimiter;
     [SerializeField] float maxMergeDis;
     [SerializeField] float maxAngle;
-    public bool Near;
 
-    private int numCols = 0;
     private int colObjectPointer;
     //outputs
     [HideInInspector] public Edge edge;
@@ -39,60 +36,26 @@ public class GrabEdgeDetector : MonoBehaviour
         triDis.Clear();
     }
 
-    //Detect tigger with Wall
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.layer == Mathf.Log(whatIsEdgeable.value, 2))
-        {
-            if (numCols < 0)
-                numCols = 0;
-            numCols++;
-
-            Near = true;
-        }
-    }
-
     //Get info when trigger is in object
-    private void OnTriggerStay(Collider other)
+    protected override void StayPer(Collider other)
     {
-        //Debug.Log(gameObject.name + " obj ");
-        if (other.gameObject.layer == Mathf.Log(whatIsEdgeable.value, 2))
-        {
-            colObjectPointer ++;
+        colObjectPointer ++;
 
-            //add all close triangles and related unique vertices
-            disciminateFaces(other);
-            if (colObjectPointer >= numCols)//calculate vars after last other
-            {
-                edgeDetect();
-            }
+        //add all close triangles and related unique vertices
+        disciminateFaces(other);
+        if (colObjectPointer >= numCols)//calculate vars after last other
+        {
+            edgeDetect();
         }
     }
 
     //End trigger
-    private void OnTriggerExit(Collider other)
+    protected override void ResetVars()
     {
-        if (Near && other.gameObject.layer == Mathf.Log(whatIsEdgeable.value, 2))
-        {
-            numCols--;
-
-            if (numCols <= 0)
-            {
-                resetVars();
-                //Debug.Log("exit Col");
-            }
-        }
-    }
-
-    private void resetVars()
-    { 
-        Near = false;
         edge = new Edge(Vector3.zero, Vector3.zero);
         edgePos = Vector3.zero;
         edgeAxis = Vector3.zero;
     }
-
-
 
     private void disciminateFaces(Collider other)
     {

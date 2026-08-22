@@ -107,7 +107,7 @@ public class PlayerColliderManager : MonoBehaviour
         colImpulse = collision.impulse;
         Invoke("resetImpulse",0.0001f);
         //Debug.DrawRay(transform.position, colImpulse, Color.blue, 1);
-        if (collision.gameObject.layer == Mathf.Log(whatIsGround.value, 2))
+        if ((whatIsGround.value & (1 << collision.gameObject.layer)) != 0)
         {
             if (numCols < 0)
                 numCols = 0;
@@ -120,7 +120,7 @@ public class PlayerColliderManager : MonoBehaviour
     //Get info when touching wall    
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.layer == Mathf.Log(whatIsGround.value, 2))
+        if ((whatIsGround.value & (1 << collision.gameObject.layer)) != 0)
         {
             if (colObjectPointer <= 0)
             {
@@ -154,7 +154,7 @@ public class PlayerColliderManager : MonoBehaviour
     //Stop Collision
     private void OnCollisionExit(Collision collision)
     {
-        if (touchingWall && collision.gameObject.layer == Mathf.Log(whatIsGround.value, 2))
+        if (touchingWall && (whatIsGround.value & (1 << collision.gameObject.layer)) != 0)
         {
             numCols--;
 

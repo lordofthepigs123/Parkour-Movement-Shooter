@@ -13,7 +13,7 @@ public class RailDetectHandler : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer != Mathf.Log(grindable.value, 2))// change once swing implimented #
+        if ((grindable.value & (1 << other.gameObject.layer)) == 0)// change once swing implimented #
             return;
         
         //pg.currentRailScript = other.gameObject.GetComponent<RailScript>();
@@ -28,7 +28,7 @@ public class RailDetectHandler : MonoBehaviour
     }
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.layer != Mathf.Log(grindable.value, 2))// change once swing implimented #
+        if ((grindable.value & (1 << other.gameObject.layer)) == 0)// change once swing implimented #
             return;
 
         RailScript holdScript = pg.currentRailScript;

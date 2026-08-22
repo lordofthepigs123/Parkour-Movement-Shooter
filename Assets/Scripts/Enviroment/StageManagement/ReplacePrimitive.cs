@@ -34,7 +34,7 @@ public class ReplacePrimitive : MonoBehaviour
                 DestroyImmediate(collider); // remove
 
                 MeshCollider meshCollider = obj.AddComponent<MeshCollider>();
-                if (!GetComponentsInParent<Rigidbody>().Equals(null))
+                if (!GetComponentsInParent<Rigidbody>().Equals(null)) // if collider is on player or other moving entity
                     meshCollider.convex = true;
                 meshCollider.sharedMesh = meshFilter.sharedMesh;
 

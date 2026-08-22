@@ -1,5 +1,4 @@
 using UnityEngine;
-using DG.Tweening;
 using UnityEngine.Animations.Rigging;
 
 public abstract class LegState : BaseState<LegStateMachine.ELegState>
@@ -72,22 +71,20 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
 
     protected void FindIkStepPosition(float inFront)
     {
-        //set below player position #move to Search state
-
         RaycastHit hitFromRoot;
         RaycastHit hitWall;
         if (!CheckInfrontWall(inFront, out hitWall))
         {
             //Search IK position
             hitFromRoot = LContext.GetStepPointRaycast(CalculateStepRaycastDirLength(), CalculateStepRaycastPosition(inFront, FlatVelocity().normalized));
-            if (hitFromRoot.collider != null)
+            if (hitFromRoot.collider == null)
             {
-                HitOffsetDecompose(hitFromRoot);
                 LContext.StrideInAir = true;
-                
+                //when no hits
                 // ledge/air behaviour check #
                 return;
             }
+            //when step hit
         }
         else
         {
@@ -118,5 +115,31 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
         Co.StepNormal[LContext.Side] = rayHit.normal;
         LContext.StepCol = rayHit.collider;
     }
+    protected void SetFDetectorEnabled(bool enabled)
+    {
+        Co.Fd.Fdh.StateHasEnabled = enabled;
+    }
 
+    protected void AirToWalkExitPrep()
+    {
+        LContext.FindLegNormal();
+        Co.CalculateStride();
+        FindIkStepPosition(Co.FrontalStride);
+    }
+
+    protected void AirToWalkExitChecks()
+    {
+        if (LContext.ThisLegNormal != Vector3.zero)
+            {
+                LContext.StridePos = LContext.ThisLegPoint + LContext.ThisLegNormal * Co.PlaceOffsetDis;
+                LContext.StrideRotation = Quaternion.FromToRotation(Vector3.up,LContext.ThisLegNormal) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
+            }
+        SetIkTarget(LContext.StridePos, LContext.StrideRotation);
+        LContext.AirFrontLeg = LegContext.FrontLeg.UNSET;
+    }
+
+    protected void WalkToAirExitChecks()
+    {
+        
+    }
 }

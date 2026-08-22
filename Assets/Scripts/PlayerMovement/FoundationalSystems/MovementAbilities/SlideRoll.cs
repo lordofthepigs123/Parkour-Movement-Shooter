@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
@@ -25,7 +23,6 @@ public class SlideRoll : PhysicsBody
     private bool canSlideRoll;
     private float detachTimer;
     private float exitTimer;
-    private float exitTime;
     private float rollTimer;
     private float applyRatio;
     [HideInInspector] public Vector3 moveDirection;
@@ -34,7 +31,6 @@ public class SlideRoll : PhysicsBody
 
     [Header("Components")]
     [SerializeField] ComboCounter cc;
-    private PlayerStats ps;
     private PlayerStateMachine sm;
     private PlayerCam pc;
     private PlayerColliderManager cm;
@@ -53,7 +49,6 @@ public class SlideRoll : PhysicsBody
 
     private void Start()
     {
-        ps = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody>();
         sm = GetComponent<PlayerStateMachine>();
         pc = cam.GetComponent<PlayerCam>();
@@ -172,7 +167,6 @@ public class SlideRoll : PhysicsBody
     //add HUD invincibility indicator for all rolls
     public void StartRoll(float ratio)
     {
-        Debug.Log("sRoll");
         cm.changeCol(PlayerColliderManager.ActiveCol.Sphere);//shrink
         sm.rolling = true;
         ih.activatedSHIFT = true;
@@ -181,11 +175,11 @@ public class SlideRoll : PhysicsBody
         ratio = Mathf.Clamp(ratio,0,1);//how much already complete#
         moveDirection = ih.planeInputDir(cm.wallNormal, false);//set direction
         spin_Axis = Quaternion.AngleAxis(90, cm.wallNormal) * moveDirection.normalized;
-        Debug.DrawRay(transform.position, moveDirection * 5, Color.red, 1);
+        //Debug.DrawRay(transform.position, moveDirection * 5, Color.red, 1);
         //calculate time
         float currentRollTime = Mathf.Lerp(minRollTime, maxRollTime, ratio);
         rollTimer = currentRollTime;
-        Debug.Log(rollTimer + " seconds");
+        //Debug.Log(rollTimer + " seconds");
         applyRatio = (maxRollTime - rollTimer) / maxRollTime;
         DOTween.To(() => applyRatio, x => applyRatio = x, 1, currentRollTime).SetEase(rollCurve);
 
@@ -210,7 +204,6 @@ public class SlideRoll : PhysicsBody
 
     private void StopRoll()
     {
-        Debug.Log("nRoll");
         if (ih.heldSHIFT)
         {
             StartSlide();
@@ -219,8 +212,7 @@ public class SlideRoll : PhysicsBody
         {
             cm.changeCol(PlayerColliderManager.ActiveCol.Capsule);
 
-            exitTime = exitTimeBase / ps.BLNC.Value * 70;
-            exitTimer = exitTime;
+            exitTimer = exitTimeBase;
             //rb.angularVelocity = Vector3.zero;
             state = SRState.exiting;
         }
@@ -229,7 +221,6 @@ public class SlideRoll : PhysicsBody
 
     public void StartSlide()
     {
-        Debug.Log("sSlide");
         //camera effects add #
 
         rb.angularVelocity *= 0.2f;
@@ -276,7 +267,7 @@ public class SlideRoll : PhysicsBody
             }
             netForce += resistForce * resistRemovMult;
 
-            Debug.DrawRay(transform.position, resistForce, Color.blue, 2);
+            //Debug.DrawRay(transform.position, resistForce, Color.blue, 2);
         }
 
         float tempAngle = cm.SlopeAngle();
@@ -285,7 +276,6 @@ public class SlideRoll : PhysicsBody
             Vector3 slopeNormal2d = new Vector3(pm.slopeNormal.x, 0, pm.slopeNormal.z).normalized;
             Vector3 slopeForce = Vector3.ProjectOnPlane(slopeNormal2d, cm.wallNormal).normalized * slopeMult * Mathf.Sin(tempAngle * 2 * Mathf.Deg2Rad);
             netForce += slopeForce;
-            Debug.Log(slopeForce * 2);
             //Debug.DrawRay(transform.position, slopeForce * 2, Color.blue);
             //Debug.DrawRay(transform.position, Vector3.ProjectOnPlane(slopeNormal2d, cm.wallNormal).normalized * 2, Color.green);
         }
@@ -298,11 +288,9 @@ public class SlideRoll : PhysicsBody
 
     private void StopSliding()
     {
-        Debug.Log("nSlide");
         cm.changeCol(PlayerColliderManager.ActiveCol.Capsule);
         sm.sliding = false;
-        exitTime = exitTimeBase / ps.BLNC.Value * 40;
-        exitTimer = exitTime;
+        exitTimer = exitTimeBase;
         state = SRState.exiting;
 
         //suck to wall

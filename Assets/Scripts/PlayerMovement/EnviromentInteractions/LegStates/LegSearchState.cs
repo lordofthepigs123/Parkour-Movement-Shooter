@@ -12,6 +12,7 @@ public class LegSearchState : LegState
 
     public override void EnterState()
     {
+        Co.StaticNormal[LContext.Side] = Co.StepNormal[LContext.Side];
         resetTimer = Co.ResetDur;
     }
     public override void ExitState(){}
@@ -31,14 +32,13 @@ public class LegSearchState : LegState
     public override void LateUpdateState(){}
     public override thisEState GetNextState()
     {
-        if (Co.Eism.CurrentStateKey == EEnviroment.Air)
+        if (Co.Eism.CurrentStateKey == EEnviroment.Air || LContext.StrideInAir)
         {
+            WalkToAirExitChecks();
             if (Co.LastStepSide != LContext.Side)
             {
-                //Debug.Log("Search -> AirJump");
                 return thisEState.AirJump;
             }
-            //Debug.Log("Search -> AirSearch");
             return thisEState.AirSearch;
         }
 

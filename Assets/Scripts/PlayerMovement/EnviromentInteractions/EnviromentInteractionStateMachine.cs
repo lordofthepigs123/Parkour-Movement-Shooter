@@ -63,9 +63,19 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private float _breakMult;
     [SerializeField] private float _normalMinFac;
     [SerializeField] private float _slopeLowerMax;
+    [SerializeField] private float _footLength;
     [Header("Air control")]
+    [SerializeField] private FootDetectManager _fd;
     [SerializeField] private AnimationCurve _airPosLerpCurve;
+    [SerializeField] private AnimationCurve _airDisLegExtendCurve;
+    [SerializeField] private float _timeCap;
     [SerializeField] private float _airRotLerpMult;
+    [SerializeField] private float _airHipMaxRepelDis;
+    [SerializeField] private float _airHipRepelMult;
+    [SerializeField] private float _airTipMaxRepelDis;
+    [SerializeField] private float _airTipRepelMult;
+    [SerializeField] private float _posLerpSpeedMod;
+    [SerializeField] [Range(0,1)] private float _airFootAngleMult;
     [Header("Arm control")]
     [SerializeField] private RangedHandler _rh;
     [SerializeField] private MeleeHandler _mh;
@@ -85,7 +95,8 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
         _strideBACCurve, _strideFWDCurve, _strideVelToDisCurve, _footLiftCurve, _maxVelocityMod, _strideDisFallVel,
         _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod, _ikEnterDur, _ikExitDur, _minCompleteRatio, _strideCurve,
         _footRotCurve, _strideHeightCurve, _minCenterDisplacement, _speedLimiterThreshold, _stepDirThresholdBuf, _smoothNormalMult, _hipDisToHeight, _hipBounceSmooth, _hipPosSmooth, _hipLerpSmooth,
-        _strechGive, _backRunDivisor, _maxAngleChange, _breakMult, _normalMinFac, _slopeLowerMax, _airPosLerpCurve, _airRotLerpMult, _maxHipFlexVert, _maxHipFlexOff, _hipFlexMod, _rh, _mh);
+        _strechGive, _backRunDivisor, _maxAngleChange, _breakMult, _normalMinFac, _slopeLowerMax, _footLength, _fd, _airPosLerpCurve, _airDisLegExtendCurve, _timeCap, _airRotLerpMult, 
+        _airHipMaxRepelDis, _airHipRepelMult, _airTipMaxRepelDis, _airTipRepelMult, _posLerpSpeedMod, _airFootAngleMult, _maxHipFlexVert, _maxHipFlexOff, _hipFlexMod, _rh, _mh);
         
         //create new leg state machines and reference their context info
         _leftFootMac = gameObject.AddComponent<LegStateMachine>();

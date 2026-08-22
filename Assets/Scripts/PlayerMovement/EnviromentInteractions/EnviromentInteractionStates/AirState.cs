@@ -9,10 +9,13 @@ public class AirState : EnviromentInteractionState
     }
 
     public override void EnterState(){}
-    public override void ExitState(){}
+    public override void ExitState()
+    {
+        ResetGeneralLegDir();
+    }
     public override void UpdateState()
     {
-        //Context.GetPlayerNormal();
+        CalculateGeneralLegDir();
     }
     public override void LateUpdateState()
     {
@@ -24,10 +27,24 @@ public class AirState : EnviromentInteractionState
         if (Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.walking)
         {
             //when regrounding to walk
-            Debug.Log("Air -> Walk");
             return thisEState.Walk;
         }
 
         return StateKey;
+    }
+
+    private void CalculateGeneralLegDir()
+    {
+        Vector3 leftlegDis = Context.LegIkConstraint[EnviromentInteractionContext.EBodySide.LEFT].data.tip.position - Context.LegIkConstraint[EnviromentInteractionContext.EBodySide.LEFT].data.root.position;
+        Vector3 rightlegDis = Context.LegIkConstraint[EnviromentInteractionContext.EBodySide.RIGHT].data.tip.position - Context.LegIkConstraint[EnviromentInteractionContext.EBodySide.RIGHT].data.root.position;
+        Vector3 generalDis = (leftlegDis + rightlegDis) / (2 * Context.LegLength);
+        generalDis = generalDis.normalized * generalDis.sqrMagnitude;
+        Context.Mr.GeneralLegDirection = generalDis;
+        Debug.DrawRay(Context.RootTransform.position,Context.Mr.GeneralLegDirection,Color.red,2);
+    }
+
+    private void ResetGeneralLegDir()
+    {
+        Context.Mr.GeneralLegDirection = Vector3.zero;
     }
 }

@@ -27,7 +27,7 @@ public class CheckPointHandeler : MonoBehaviour
     //Death Plane
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == Mathf.Log(playerLayer.value, 2))
+        if ((playerLayer.value & (1 << other.gameObject.layer)) != 0)
         {
             player.position = triggers[currentNum].resetPos;
         }

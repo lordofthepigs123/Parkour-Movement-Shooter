@@ -15,7 +15,7 @@ public class CheckPoint : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == Mathf.Log(cph.playerLayer.value, 2))
+        if ((cph.playerLayer.value & (1 << other.gameObject.layer)) != 0)
         {
             activated = true;
             Invoke("resetActive", 0.1f);
