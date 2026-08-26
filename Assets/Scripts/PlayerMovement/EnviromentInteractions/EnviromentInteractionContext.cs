@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -43,6 +42,7 @@ public class EnviromentInteractionContext
     private AnimationCurve _footRotCurve;
     private AnimationCurve _strideHeightCurve;
     private float _minCenterDisplacement;
+    private float _maxReverseSpeed;
     private float _speedLimiterThreshold;
     private float _stepDirThresholdBuf;
     private float _smoothNormalMult;
@@ -54,7 +54,7 @@ public class EnviromentInteractionContext
     private float _backRunDivisor;
     private float _maxAngleChange;
     private float _breakMult;
-    private float _normalMinFac;
+    private float _rayNormalFac;
     private float _slopeLowerMax;
     private float _footLength;
     private FootDetectManager _fd;
@@ -80,9 +80,9 @@ public class EnviromentInteractionContext
     Collider rootCollider, Transform rootTransform, MainRagdollHandeler mr, LayerMask groundLayer, AnimationCurve strideBACCurve, AnimationCurve strideFWDCurve,
     AnimationCurve strideVelToDisCurve, AnimationCurve footLiftCurve, float maxVelocityMod, float strideDisFallVel, float maxStepDownDis, float placeOffsetDis,
     float resetDur, float resetDurMod, float ikEnterDur, float ikExitDur, float minCompleteRatio, AnimationCurve strideCurve, 
-    AnimationCurve footRotCurve, AnimationCurve strideHeightCurve, float minCenterDisplacement, float speedLimiterThreshold, float stepDirThresholdBuf,
+    AnimationCurve footRotCurve, AnimationCurve strideHeightCurve, float minCenterDisplacement, float maxReverseSpeed, float speedLimiterThreshold, float stepDirThresholdBuf,
     float smoothNormalMult, AnimationCurve hipDisToHeight, float hipBounceSmooth, float hipPosSmooth, float hipLerpSmooth, float strechGive, float backRunDivisor, float maxAngleChange, float breakMult, 
-    float normalMinFac, float slopeLowerMax, float footLength, FootDetectManager fd, AnimationCurve airPosLerpCurve, AnimationCurve airDisLegExtendCurve, float timeCap, float airRotLerpMult, float airHipMaxRepelDis, 
+    float rayNormalFac, float slopeLowerMax, float footLength, FootDetectManager fd, AnimationCurve airPosLerpCurve, AnimationCurve airDisLegExtendCurve, float timeCap, float airRotLerpMult, float airHipMaxRepelDis, 
     float airHipRepelMult, float airTipMaxRepelDis, float airTipRepelMult, float posLerpSpeedMod, float airFootAngleMult, float maxHipFlexVert, float maxHipFlexOff, float hipFlexMod, RangedHandler rh, MeleeHandler mh)
     {
         _eism = eism;
@@ -108,6 +108,7 @@ public class EnviromentInteractionContext
         _footRotCurve = footRotCurve;
         _strideHeightCurve = strideHeightCurve;
         _minCenterDisplacement = minCenterDisplacement;
+        _maxReverseSpeed = maxReverseSpeed;
         _speedLimiterThreshold = speedLimiterThreshold;
         _stepDirThresholdBuf = stepDirThresholdBuf;
         _smoothNormalMult = smoothNormalMult;
@@ -119,7 +120,7 @@ public class EnviromentInteractionContext
         _backRunDivisor = backRunDivisor;
         _maxAngleChange = maxAngleChange;
         _breakMult = breakMult;
-        _normalMinFac = normalMinFac;
+        _rayNormalFac = rayNormalFac;
         _slopeLowerMax = slopeLowerMax;
         _footLength = footLength;
         _fd = fd;
@@ -214,6 +215,7 @@ public class EnviromentInteractionContext
     public AnimationCurve FootRotCurve => _footRotCurve;
     public AnimationCurve StrideHeightCurve => _strideHeightCurve;
     public float MinCenterDisplacement => _minCenterDisplacement; // displacement before start move - should be Greater than MinActivePointDistance
+    public float MaxReverseSpeed => _maxReverseSpeed;
     public float SpeedLimiterThreshold => _speedLimiterThreshold;
     public float StepDirThresholdBuf => _stepDirThresholdBuf;
     public float SmoothNormalMult => _smoothNormalMult;
@@ -225,10 +227,11 @@ public class EnviromentInteractionContext
     public float BackRunDivisor => _backRunDivisor;
     public float MaxAngleChange => _maxAngleChange;
     public float BreakMult => _breakMult;
-    public float NormalMinFac => _normalMinFac;
+    public float RayNormalFac => _rayNormalFac;
     public float SlopeLowerMax => _slopeLowerMax;
     public float FootLength => _footLength;
     public FootDetectManager Fd => _fd;
+    public Vector3 FootDetectorTrans => Fd.Detector.position;
     public Vector3 TrackPoint => Fd.TrackPoint;
     public float TrackDot => Fd.TrackDot;
     public bool Tracking => Fd.Tracking;
@@ -294,6 +297,12 @@ public class EnviromentInteractionContext
             SmoothPlayerNormal = Vector3.zero;
         else
             SmoothPlayerNormal = Vector3.Lerp(SmoothPlayerNormal, InstantPlayerNormal, SmoothNormalMult * Time.deltaTime).normalized;
+    }
+
+    public void ResetPlayerNormal()
+    {
+        InstantPlayerNormal = Vector3.zero;
+        SmoothPlayerNormal = Vector3.zero;
     }
 
     public Vector3 SFlatVelocity()

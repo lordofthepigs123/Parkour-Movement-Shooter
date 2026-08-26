@@ -15,9 +15,9 @@ public class LegStepState : LegState
         Co.LastStepSide = LContext.Side;
         Co.StaticNormal[LContext.Side] = Vector3.zero;
         LContext.ThisOppositeInvalidState[LContext.Side] = true;
-        LContext.referencePos = LContext.ThisIkConstraint.data.root.position; //save current root pos
-        LContext.startPos = LContext.LockedPosition; //save current target
-        LContext.startNormal = LContext.LockedRotation * Vector3.up;
+        LContext.ReferencePos = LContext.ThisIkConstraint.data.root.position; //save current root pos
+        LContext.StartPos = LContext.LockedPosition; //save current target
+        LContext.StartNormal = LContext.LockedRotation * Vector3.up;
         LContext.ActiveRatio = 0;
     }
     public override void ExitState()
@@ -27,7 +27,7 @@ public class LegStepState : LegState
     }
     public override void UpdateState()
     {
-        LContext.FindLegNormal();//#more robust
+        LContext.FindFootNormal(-Co.RootTransform.up);
         Co.CalculateStride();
 
         //active estimate of final landing step point
@@ -59,8 +59,12 @@ public class LegStepState : LegState
         if (fullCycle && hitStepPointValid)
         {
             //home in on contact position, frozen
-            LContext.StridePos = LContext.StepPos;//lock in to final pos and rot
-            LContext.StrideRotation = Quaternion.FromToRotation(Vector3.up,Co.StepNormal[LContext.Side]) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
+            Vector3 footNormal = BlendDotPowVec(Co.StepNormal[LContext.Side], Co.RootTransform.up, Co.RayNormalFac);
+
+            //lock in to final pos and rot
+            LContext.StridePos = LContext.StepPos + (1 - Vector3.Dot(LContext.ThisLegNormal, footNormal)) * Co.FootLength * LContext.ThisLegNormal; // anti clip rise
+
+            LContext.StrideRotation = Quaternion.FromToRotation(Vector3.up,footNormal) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
             SetIkTarget(LContext.StridePos, LContext.StrideRotation); //#
             HoldIkTarget();
             return thisEState.Search;
@@ -74,7 +78,7 @@ public class LegStepState : LegState
     private void FindNextIkStridePosition()
     {
         //get ratio _ traveled dis : ToMoveDisStride
-        float progressRatio = -LContext.DistanceFromCenterFlat(LContext.referencePos, LContext.Side) / Co.ToMoveDisStride;
+        float progressRatio = -LContext.DistanceFromCenterFlat(LContext.ReferencePos, LContext.Side) / Co.ToMoveDisStride;
         if (float.IsNaN(progressRatio) || Co.ToMoveDisStride < 0.001f)
             progressRatio = 1;
         progressRatio = Mathf.Clamp(progressRatio, 0 , 1);
@@ -100,21 +104,22 @@ public class LegStepState : LegState
         }
 
 
-        Vector3 transitionNormal = Vector3.Lerp(LContext.startNormal, Co.StepNormal[LContext.Side], LContext.ActiveRatio).normalized; // Lerped normal between start surface and final
-        
+        Vector3 transitionNormal = Vector3.Lerp(LContext.StartNormal, Co.StepNormal[LContext.Side], LContext.ActiveRatio).normalized; // Lerped normal between start surface and final
+        Vector3 footNormal = BlendDotPowVec(transitionNormal, Co.RootTransform.up, Co.RayNormalFac);
+
         //calc animation graph forward stride progress horizontal
         float horizontalPosRatio = Co.StrideCurve.Evaluate(LContext.ActiveRatio);
         //calc animation graph height
         float normalMult = Co.StrideHeightCurve.Evaluate(LContext.ActiveRatio);
-        Vector3 normalAdd = Co.FootLiftMult * normalMult * transitionNormal;
+        Vector3 normalAdd = Co.FootLiftMult * normalMult * footNormal + (1 - Vector3.Dot(LContext.ThisLegNormal, footNormal)) * Co.FootLength * LContext.ThisLegNormal; // anti clip rise
 
-        Vector3 toStepDif = LContext.StepPos - LContext.startPos;
+        Vector3 toStepDif = LContext.StepPos - LContext.StartPos;
         //Debug.DrawRay(LContext.StepPos, Vector3.up * 2, Color.red);
         //Debug.DrawRay(LContext.startPos, Vector3.up * 2, Color.blue);
-        LContext.StridePos = LContext.startPos + toStepDif * horizontalPosRatio + normalAdd;
+        LContext.StridePos = LContext.StartPos + toStepDif * horizontalPosRatio + normalAdd;
         //Debug.DrawRay(LContext.StridePos, Vector3.up * 2, Color.green);
 
         float footRotAngle = Co.FootRotCurve.Evaluate(LContext.ActiveRatio) * 90 * Co.FootLiftMult; // scale rotation magnitude based on foot lift mult
-        LContext.StrideRotation = Quaternion.AngleAxis(footRotAngle, Vector3.right) * Quaternion.FromToRotation(Vector3.up,transitionNormal) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
+        LContext.StrideRotation = Quaternion.AngleAxis(footRotAngle, Vector3.right) * Quaternion.FromToRotation(Vector3.up, footNormal) * Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(Co.RootTransform.forward, Vector3.up));
     }
 }

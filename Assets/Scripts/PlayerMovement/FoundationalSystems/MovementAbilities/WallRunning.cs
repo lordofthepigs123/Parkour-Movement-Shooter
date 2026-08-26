@@ -76,7 +76,6 @@ public class WallRunning : MonoBehaviour
     private Vector3 wallInputDir;
     [HideInInspector] public Vector3 _wallNormal;
     private Vector3 wallVelocity;
-    private Vector3 horizontalWV;
 
     private bool wallForward;
     private bool wallBack;
@@ -93,9 +92,7 @@ public class WallRunning : MonoBehaviour
     [SerializeField] PlayerCam cam;
 
     private Collider currentWall;
-    private Collider lastWall;
 
-    private PlayerStats ps;
     private PlayerStateMachine sm;
     private Rigidbody rb;
     private Wedge wedge;
@@ -119,7 +116,6 @@ public class WallRunning : MonoBehaviour
 
     private void Start()
     {
-        ps = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody>();
         sm = GetComponent<PlayerStateMachine>();
         wedge = GetComponent<Wedge>();
@@ -239,10 +235,9 @@ public class WallRunning : MonoBehaviour
     private void StateMachine()
     {
         //reset counts
-        if (cm.grounded || sm.wedgeGrabing)
+        if (cm.touchingGround || sm.wedgeGrabing)
         {
             jumpRemaining = wallJumpAmount;
-            lastWall = null;
         }
 
         //get inputs direction
@@ -330,42 +325,41 @@ public class WallRunning : MonoBehaviour
             }
 
             ExitChecks();
+            return;
         }
-        else
-        {
-            if (cm.grounded || sm.sliding || sm.rolling || wedge.holding)
-            {
-                enterTimer = enterTime;
-                return;
-            }
 
-            if (proximWall)
+        //from other into wall
+        if (cm.touchingGround || sm.sliding || sm.rolling || wedge.holding)
+        {
+            enterTimer = enterTime;
+            return;
+        }
+        if (proximWall)
+        {
+            //delay on enter
+            if (ih.ikeySPACE)
             {
-                //delay on enter
-                if (ih.ikeySPACE)
-                {
-                    bounce = true;
-                }
-                else if (!bounce && jumpRemaining > 0)
+                bounce = true;
+            }
+            else if (!bounce && jumpRemaining > 0)
+            {
+                stateCheck();
+            }
+            if (jumpRemaining > 0)
+            {
+                enterTimer -= Time.deltaTime;
+                if (bounce && enterTimer < 0)
                 {
                     stateCheck();
                 }
-                if (jumpRemaining > 0)
-                {
-                    enterTimer -= Time.deltaTime;
-                    if (bounce && enterTimer < 0)
-                    {
-                        stateCheck();
-                    }
-                }
-                else// no jumps left
-                {
-                    state = WallState.neutral;
-                }
             }
-            else
-                enterTimer = enterTime;
+            else// no jumps left
+            {
+                state = WallState.neutral;
+            }
         }
+        else
+            enterTimer = enterTime;
     }
     private void stateCheck()
     {
@@ -396,7 +390,7 @@ public class WallRunning : MonoBehaviour
 
     private bool leaveCheck()
     {
-        if (!proximWall || cm.grounded || wedge.holding || wedge.exitingWedge || sm.rolling || sm.sliding)
+        if (!proximWall || cm.touchingGround || wedge.holding || wedge.exitingWedge || sm.rolling || sm.sliding)
         {
             state = WallState.exitingWall;
             return true;
@@ -419,7 +413,7 @@ public class WallRunning : MonoBehaviour
     }
     private void regenStrength()
     {
-        if (((proximWall && !cm.grounded) || wallRunStrength >= wallRunStrengthMax) && !strengthRegenable)
+        if (((proximWall && !cm.touchingGround) || wallRunStrength >= wallRunStrengthMax) && !strengthRegenable)
             return;
 
         wallRunStrength += strengthRegen * Time.deltaTime;
@@ -471,9 +465,6 @@ public class WallRunning : MonoBehaviour
 
         enterBoost();
 
-        //if same wall penalty #
-        lastWall = currentWall;
-
         //extra speed
         if (wallVelocity.y > 0)
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y * 1.1f, rb.linearVelocity.z);
@@ -497,8 +488,6 @@ public class WallRunning : MonoBehaviour
         //boost#
         enterBoost();
 
-        //if same wall penalty#
-        lastWall = currentWall;
         //camera effect#
     }
 

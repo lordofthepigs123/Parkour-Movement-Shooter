@@ -39,7 +39,7 @@ public class LegAirSearchState : LegState
     public override thisEState GetNextState()
     {
         //reset to walk
-        if (Co.Eism.CurrentStateKey == EEnviroment.Walk)
+        if (Co.Eism.CurrentStateKey == EEnviroment.Walk || Co.Eism.CurrentStateKey == EEnviroment.Wall)
         {
             AirToWalkExitPrep();
             if (!LContext.StrideInAir)

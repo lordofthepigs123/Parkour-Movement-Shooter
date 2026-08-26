@@ -3,9 +3,9 @@ using UnityEngine;
 
 using thisEState = EnviromentInteractionStateMachine.EEnviromentInteractionState; // shorthand
 
-public class WalkState : EnviromentInteractionState
+public class WallState : EnviromentInteractionState
 {
-    public WalkState(EnviromentInteractionContext context, thisEState estate) : base(context, estate)
+    public WallState(EnviromentInteractionContext context, thisEState estate) : base(context, estate)
     {
 
     }
@@ -30,17 +30,12 @@ public class WalkState : EnviromentInteractionState
         if (Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.air)
         {
             //when ungrounding or jumping
-            Debug.Log("Air");
             return thisEState.Air;
         }
-        if (Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallrunning ||
-        Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallrunningup ||
-        Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallrunningdown ||
-        Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallresistdown)
+        if (Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.walking)
         {
-            //when ungrounding or jumping
-            Debug.Log("Wall");
-            return thisEState.Wall;
+            //when regrounding to walk
+            return thisEState.Walk;
         }
 
         return StateKey;

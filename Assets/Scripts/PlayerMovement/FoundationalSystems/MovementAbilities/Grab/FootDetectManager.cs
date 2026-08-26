@@ -12,17 +12,17 @@ public class FootDetectManager : MonoBehaviour
     [HideInInspector] public bool StateHasEnabled;
 
     [Header("Components")]
-    [SerializeField] private Transform _detector; 
+    public Transform Detector; 
     [SerializeField] private Rigidbody rb;
     public FootDetectorHandler Fdh; 
 
     private void Start()
     {
-        Fdh = _detector.GetComponent<FootDetectorHandler>();
+        Fdh = Detector.GetComponent<FootDetectorHandler>();
     }
     private void Update()
     {
-        CalcTrackPoints(_detector, out TrackPoint, out TrackDot, out Tracking);
+        CalcTrackPoints(Detector, out TrackPoint, out TrackDot, out Tracking);
     }
     private void CalcTrackPoints(Transform _detector, out Vector3 _trackPoint , out float _trackDot, out bool _tracking)
     {

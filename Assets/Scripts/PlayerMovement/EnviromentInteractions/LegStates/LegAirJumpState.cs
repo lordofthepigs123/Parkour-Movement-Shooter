@@ -20,7 +20,7 @@ public class LegAirJumpState : LegState
     }
     public override void UpdateState()
     {
-        LContext.FindLegNormal();//#
+        LContext.FindFootNormal(-Co.RootTransform.up);
 
         //find and set next IK target
         FindNextIkAirPosition();
@@ -39,7 +39,7 @@ public class LegAirJumpState : LegState
         }
 
         //reset to walk
-        if (Co.Eism.CurrentStateKey == EEnviroment.Walk)
+        if (Co.Eism.CurrentStateKey == EEnviroment.Walk || Co.Eism.CurrentStateKey == EEnviroment.Wall)
         {
             AirToWalkExitPrep();
             if (!LContext.StrideInAir) 

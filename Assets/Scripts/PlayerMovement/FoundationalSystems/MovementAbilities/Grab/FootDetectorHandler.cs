@@ -114,9 +114,12 @@ public class FootDetectorHandler : MonoBehaviour
 
         //Add final hits to list
         TargetStore = hitsPoint;
+
+        /* debug
         for (int i = 0; i < hitsPoint.Count; i++)
         {
             Debug.DrawRay(hitsPoint[i],hitsNormal[i],Color.purple);
         }
+        */
     }
 }

@@ -46,10 +46,10 @@ public class LegContext
     public Collider StepCol;
     public Vector3 StridePos; //lerped position based on pos body og vs current / fwd stride
     public Quaternion StrideRotation;
-    public Vector3 referencePos; //body position at stride start
-    public Vector3 startPos; //foot position at stride start
-    public Vector3 startNormal; //foot position at stride start
-    public Vector3 rayDirNormal; //direction used for raycast check step position
+    public Vector3 ReferencePos; //body position at stride start
+    public Vector3 StartPos; //foot position at stride start
+    public Vector3 StartNormal; //foot position at stride start
+    public Vector3 RayDirNormal; //direction used for raycast check step position, blend between currentNormal and root.up
     public bool StrideInAir;
     public Vector3 LockedPosition; //target postion on current frame
     public Quaternion LockedRotation;
@@ -70,17 +70,17 @@ public class LegContext
         return (ThisIkConstraint.data.tip.position - ThisLegTransform.position).magnitude;
     }
 
-    public void FindLegNormal()
+    public void FindFootNormal(Vector3 RayDir)
     {
-        RaycastHit temp = GetStepPointRaycast(WaistToDownDist * -Context.RootTransform.up, ThisIkConstraint.data.tip.position);
-        //Debug.DrawRay(ThisIkConstraint.data.tip.position, WaistToDownDist * -Context.RootTransform.up, Color.rebeccaPurple);
+        RaycastHit temp = GetStepPointRaycast(WaistToDownDist * RayDir.normalized, ThisIkConstraint.data.tip.position);
         ThisLegNormal = temp.normal; // zero if no hit
         ThisLegPoint = temp.point; // zero if no hit
     }
 
     public Vector3 RootToGround()
     {
-        RaycastHit temp = GetStepPointRaycast(WaistToDownDist * rayDirNormal, ThisIkConstraint.data.root.position);
+        //displacement between direct tracking pos below hips and hips
+        RaycastHit temp = GetStepPointRaycast(WaistToDownDist * RayDirNormal, ThisIkConstraint.data.root.position);
         Vector3 tempDif = temp.point - ThisIkConstraint.data.root.position;
         return tempDif;
     }
@@ -105,6 +105,7 @@ public class LegContext
 
     public Vector3 TranslateAdjustOnNormal(Vector3 point)
     {
+        // translate foot tip pos to equivalent point on floor that simulates realistic gravitational stabilize on slopes
         Vector3 rootToground = RootToGround();
         float targetMag = Mathf.Cos(Vector3.Angle(rootToground, -ThisLegNormal)) * rootToground.magnitude; // a = cos() * h
         Vector3 target = ThisIkConstraint.data.root.position - targetMag * ThisLegNormal; // calc third point on right triangle
@@ -115,9 +116,9 @@ public class LegContext
     public void RotationAdjust()
     {
         // move the set reference positions for start of stride when turning camera to remain behind camera
-        Quaternion adjustRot = Quaternion.FromToRotation(Vector3.ProjectOnPlane(Context.LastRootDir, startNormal), Vector3.ProjectOnPlane(Context.RootTransform.forward, startNormal));
-        referencePos = RotateAroundPoint(referencePos, Context.RootTransform.position, adjustRot);
-        startPos = RotateAroundPoint(startPos, Context.RootTransform.position, adjustRot);
+        Quaternion adjustRot = Quaternion.FromToRotation(Vector3.ProjectOnPlane(Context.LastRootDir, StartNormal), Vector3.ProjectOnPlane(Context.RootTransform.forward, StartNormal));
+        ReferencePos = RotateAroundPoint(ReferencePos, Context.RootTransform.position, adjustRot);
+        StartPos = RotateAroundPoint(StartPos, Context.RootTransform.position, adjustRot);
     }
 
     public Vector3 RotateAroundPoint(Vector3 point, Vector3 pivot, Quaternion rotation)

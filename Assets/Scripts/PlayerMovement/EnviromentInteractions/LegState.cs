@@ -26,7 +26,7 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
         //Gets walk reference normal
         //Check infront of leg stride for obstacle
         CurrentNormal = ColNormal;
-        RaycastHit frontalCheck = LContext.GetStepPointRaycast(FlatVelocity().normalized * (LContext.LegLength - frontalStride), Constraint.data.root.position);
+        RaycastHit frontalCheck = LContext.GetStepPointRaycast(FlatVelocity().normalized * (LContext.LegLength - frontalStride), Constraint.data.root.position); // #
         if (frontalCheck.collider != null)
         {//wall infront - change normal reference
             hitFromRoot = frontalCheck; // wall hit position is IK position #
@@ -53,9 +53,16 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
     private Vector3 CalculateStepRaycastDirLength()
     {
         //blend slope normal (high speed) and up vector
-        LContext.rayDirNormal = -Vector3.Lerp(Vector3.up + CurrentNormal * Co.NormalMinFac, CurrentNormal, Co.SpeedStrideRatio).normalized;
-        Vector3 rayDirLength = LContext.rayDirNormal * LContext.WaistToDownDist; //from waist to largest step down distance
+        LContext.RayDirNormal = -BlendDotPowVec(CurrentNormal, Co.RootTransform.up, Co.RayNormalFac);
+        Vector3 rayDirLength = LContext.RayDirNormal * LContext.WaistToDownDist; //from waist to largest step down distance
         return rayDirLength;
+    }
+
+    protected Vector3 BlendDotPowVec(Vector3 from, Vector3 to, float pow)
+    {
+        float blend = (Vector3.Dot(from, to) + 1) / 2;
+        blend = Mathf.Pow(blend, pow);
+        return Vector3.Lerp(from, to, blend).normalized;
     }
     
     private Vector3 CalculateStepRaycastPosition(float infront, Vector3 fwdDir)
@@ -82,6 +89,8 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
                 LContext.StrideInAir = true;
                 //when no hits
                 // ledge/air behaviour check #
+
+
                 return;
             }
             //when step hit
@@ -122,7 +131,12 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
 
     protected void AirToWalkExitPrep()
     {
-        LContext.FindLegNormal();
+        Vector3 aproachTrackDir;
+        if (Co.Tracking)
+            aproachTrackDir = Co.TrackPoint - Co.FootDetectorTrans;
+        else
+            aproachTrackDir = -Co.RootTransform.up;
+        LContext.FindFootNormal(aproachTrackDir);
         Co.CalculateStride();
         FindIkStepPosition(Co.FrontalStride);
     }
@@ -140,6 +154,6 @@ public abstract class LegState : BaseState<LegStateMachine.ELegState>
 
     protected void WalkToAirExitChecks()
     {
-        
+        Co.ResetPlayerNormal();
     }
 }

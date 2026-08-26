@@ -139,6 +139,8 @@ public class PlayerCam : MonoBehaviour
 
     public void DoTilt(float zTilt)
     {
+        if (!float.IsFinite(zTilt))
+            return;
         transform.DOLocalRotate(new Vector3(0, 0, zTilt), 0.25f);
         tilt = zTilt;
     }

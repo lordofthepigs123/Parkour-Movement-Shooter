@@ -6,6 +6,7 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     public enum EEnviromentInteractionState
     {
         Walk,
+        Wall,
         Air,
         Swing,
         Animation,
@@ -54,6 +55,7 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private AnimationCurve _footRotCurve;
     [SerializeField] private AnimationCurve _strideHeightCurve;
     [SerializeField] private float _minCenterDisplacement;
+    [SerializeField] private float _maxReverseSpeed;
     [SerializeField] private float _speedLimiterThreshold;
     [SerializeField] private float _stepDirThresholdBuf;
     [SerializeField] private float _smoothNormalMult;
@@ -61,7 +63,7 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     [SerializeField] private float _backRunDivisor;
     [SerializeField] private float _maxAngleChange;
     [SerializeField] private float _breakMult;
-    [SerializeField] private float _normalMinFac;
+    [SerializeField] private float _rayNormalFac;
     [SerializeField] private float _slopeLowerMax;
     [SerializeField] private float _footLength;
     [Header("Air control")]
@@ -94,8 +96,8 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
         _context = new EnviromentInteractionContext(this, _hipsConstraint, _leftLegIkConstraint, _rightLegIkConstraint, _leftArmIkConstraint, _rightArmIkConstraint, _fwdAirSearchReference, _bwdAirSearchReference, _rb, _rootCollider, _rootBodyTransform, _mr, _groundLayer,
         _strideBACCurve, _strideFWDCurve, _strideVelToDisCurve, _footLiftCurve, _maxVelocityMod, _strideDisFallVel,
         _maxStepDownDis, _placeOffsetDis, _resetDur, _resetDurMod, _ikEnterDur, _ikExitDur, _minCompleteRatio, _strideCurve,
-        _footRotCurve, _strideHeightCurve, _minCenterDisplacement, _speedLimiterThreshold, _stepDirThresholdBuf, _smoothNormalMult, _hipDisToHeight, _hipBounceSmooth, _hipPosSmooth, _hipLerpSmooth,
-        _strechGive, _backRunDivisor, _maxAngleChange, _breakMult, _normalMinFac, _slopeLowerMax, _footLength, _fd, _airPosLerpCurve, _airDisLegExtendCurve, _timeCap, _airRotLerpMult, 
+        _footRotCurve, _strideHeightCurve, _minCenterDisplacement, _maxReverseSpeed, _speedLimiterThreshold, _stepDirThresholdBuf, _smoothNormalMult, _hipDisToHeight, _hipBounceSmooth, _hipPosSmooth, _hipLerpSmooth,
+        _strechGive, _backRunDivisor, _maxAngleChange, _breakMult, _rayNormalFac, _slopeLowerMax, _footLength, _fd, _airPosLerpCurve, _airDisLegExtendCurve, _timeCap, _airRotLerpMult, 
         _airHipMaxRepelDis, _airHipRepelMult, _airTipMaxRepelDis, _airTipRepelMult, _posLerpSpeedMod, _airFootAngleMult, _maxHipFlexVert, _maxHipFlexOff, _hipFlexMod, _rh, _mh);
         
         //create new leg state machines and reference their context info
@@ -120,6 +122,7 @@ public class EnviromentInteractionStateMachine : StateManager<EnviromentInteract
     private void InitializeStates() // Add States to inherited StateManager dictionary and set initial state
     {
         States.Add(EEnviromentInteractionState.Walk, new WalkState(_context, EEnviromentInteractionState.Walk));
+        States.Add(EEnviromentInteractionState.Wall, new WallState(_context, EEnviromentInteractionState.Wall));
         States.Add(EEnviromentInteractionState.Air, new AirState(_context, EEnviromentInteractionState.Air));
 
         // Set first state

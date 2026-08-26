@@ -16,8 +16,9 @@ public class MainRagdollHandeler : PhysicsBody
     [SerializeField] float friction_WallRun;
     [SerializeField] float speedMult_Prone;
     [SerializeField] float friction_Prone;
-    [SerializeField] float spreadMult;
-    [SerializeField] float percentMod;
+    [SerializeField] float maxYTiltSpeed;
+    [SerializeField] AnimationCurve yTiltIntenistyRatio;
+    [SerializeField] float maxMultSpeed;
     [SerializeField] float degreeMax; // degrees 0 - 90
     [SerializeField] float legDirectionStrength;
     [SerializeField] float deflectionMult;
@@ -117,7 +118,7 @@ public class MainRagdollHandeler : PhysicsBody
             spdMult_ang = speedMult_WallRun;
             angFriction = friction_WallRun;
             Vector3 tempSide = Vector3.Cross(Vector3.up, wr._wallNormal);
-            desiRotation = frictionAngDeflect() * Quaternion.AngleAxis(20, tempSide) * bodyDirection.rotation;
+            desiRotation = frictionAngDeflect() * Quaternion.AngleAxis(60, tempSide) * bodyDirection.rotation;
             movementForces(1);
             angularResistance();
         }
@@ -138,7 +139,7 @@ public class MainRagdollHandeler : PhysicsBody
             angFriction = friction_WallRun;
             Vector3 tempSide = Vector3.Cross(Vector3.up, wr._wallNormal);
             Quaternion flipRot = Quaternion.FromToRotation(Vector3.Reflect(bodyDirection.rotation * Vector3.forward, wr._wallNormal), bodyDirection.rotation * Vector3.forward);
-            desiRotation = frictionAngDeflect() * flipRot * Quaternion.AngleAxis(-135, tempSide) * bodyDirection.rotation;
+            desiRotation = frictionAngDeflect() * flipRot * Quaternion.AngleAxis(90, tempSide) * bodyDirection.rotation;
             movementForces(1);
             angularResistance();
             //add camera restrictions#
@@ -201,11 +202,14 @@ public class MainRagdollHandeler : PhysicsBody
 
             Quaternion tempRot;
             // tilt towards velocity
-            float tempYvel = rb.linearVelocity.y / spreadMult;
-            float deflectionMult = rb.linearVelocity.magnitude / spreadMult * (2 * tempYvel / (Mathf.Pow(tempYvel, 2) + 1)); // when y negative, negative
-            float mixDegree = 2 / (1 + Mathf.Pow(1 + 1 / percentMod, -deflectionMult)) - 1;
+            float tempYvel = -rb.linearVelocity.y / maxYTiltSpeed;
+            tempYvel = Mathf.Clamp(tempYvel, -1, 1);
+            float mixDegreeRatio = yTiltIntenistyRatio.Evaluate(tempYvel);
+
+            float flatSpeed = new Vector3(rb.linearVelocity.x,0,rb.linearVelocity.z).magnitude;
+            mixDegreeRatio *= Mathf.Clamp(Mathf.Pow(flatSpeed / maxMultSpeed, 0.5f),0,1);
             Vector3 velCross = Vector3.Cross(rb.linearVelocity, Vector3.up); // axis to rotate around
-            tempRot = Quaternion.AngleAxis(-mixDegree * degreeMax, velCross);
+            tempRot = Quaternion.AngleAxis(mixDegreeRatio * degreeMax, velCross);
 
             // merge with GeneralLegDirection
             Vector3 mergedDirection = tempRot * Vector3.up - GeneralLegDirection * legDirectionStrength;

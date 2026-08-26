@@ -29,6 +29,15 @@ public class AirState : EnviromentInteractionState
             //when regrounding to walk
             return thisEState.Walk;
         }
+        if (Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallrunning ||
+        Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallrunningup ||
+        Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallrunningdown ||
+        Context.Sm.CurrentStateKey == PlayerStateMachine.EMovementState.wallresistdown)
+        {
+            //when ungrounding or jumping
+            Debug.Log("Wall");
+            return thisEState.Wall;
+        }
 
         return StateKey;
     }
@@ -40,7 +49,7 @@ public class AirState : EnviromentInteractionState
         Vector3 generalDis = (leftlegDis + rightlegDis) / (2 * Context.LegLength);
         generalDis = generalDis.normalized * generalDis.sqrMagnitude;
         Context.Mr.GeneralLegDirection = generalDis;
-        Debug.DrawRay(Context.RootTransform.position,Context.Mr.GeneralLegDirection,Color.red,2);
+        //Debug.DrawRay(Context.RootTransform.position,Context.Mr.GeneralLegDirection,Color.red,2);
     }
 
     private void ResetGeneralLegDir()

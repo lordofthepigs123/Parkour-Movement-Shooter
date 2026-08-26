@@ -23,7 +23,7 @@ public class LegSearchState : LegState
             resetTimer -= Time.deltaTime * Mathf.Pow(Co.ResetDurMod, Co.Rb.linearVelocity.magnitude);
         }
 
-        LContext.FindLegNormal();//#
+        LContext.FindFootNormal(-Co.RootTransform.up);
         Co.CalculateStride();
 
         //set IK target
@@ -48,28 +48,49 @@ public class LegSearchState : LegState
         float faceDirVelDot = Vector3.Dot(Vector3.ProjectOnPlane(Co.RootTransform.forward, CurrentNormal).normalized, FlatVelocity().normalized);
         bool steppingFwd = faceDirVelDot >= Co.StepDirThresholdBuf * (Co.LastStepDir == EnviromentInteractionContext.EStepDir.BACKWARD ? 1 : -1); // Step fwd or back, with margin bias towards last direction
         
-        bool strideDisPassed, maxAnglePassed, significantDis, hitStepPointValid, otherFootValidPosition, overStreched, otherFootForward, otherFootFired, reseted;
+        bool strideDisPassed, maxAnglePassed, significantDis, hitStepPointValid, otherFootValidPosition, overStreched, otherFootForward, otherFootFired, reseted, reverse;
         //active estimate of final landing step point
         if (steppingFwd)
         {
             FindIkStepPosition(Co.FrontalStride);
             strideDisPassed = displace < -Co.BackStride;
             otherFootForward = otherDisplace > 0;
+
+            reverse = displace > Co.FrontalStride;
+            bool slow = FlatVelocity().magnitude < Co.MaxReverseSpeed;
+            if (reverse && slow) // reverse when overshot and going slowly
+            {
+                steppingFwd = false;
+                strideDisPassed = true;
+            }
         }
         else
         {
             FindIkStepPosition(Co.BackStride);
             strideDisPassed = displace < -Co.FrontalStride;
             otherFootForward = otherDisplace > Co.BackStride / Co.BackRunDivisor;
+
+            reverse = displace > Co.BackStride;
+            bool slow = FlatVelocity().magnitude < Co.MaxReverseSpeed;
+            if (reverse && slow) // reverse when overshot and going slowly
+            {
+                steppingFwd = true;
+                strideDisPassed = true;
+            }
         }
         
-        maxAnglePassed = angDis > Co.MaxAngleChange;
-        significantDis = -displace > Co.MinCenterDisplacement;
+        maxAnglePassed = angDis > Co.MaxAngleChange; // yaw angle significant, shuffle
+        significantDis = -displace > Co.MinCenterDisplacement || (reverse && displace > Co.MinCenterDisplacement);
         hitStepPointValid = LContext.StepCol != null;
         otherFootFired = Co.LastStepSide != LContext.Side; // in alternating order
         reseted = resetTimer <= 0; // or reset time has passed
         otherFootValidPosition = !LContext.ThisOppositeInvalidState[LContext.OtherSide]; // walking
         overStreched = (LContext.ThisIkConstraint.data.tip.position - LContext.LockedPosition).magnitude > Co.StrechGive; // vs running 
+
+        // placed foot has passed stride dis from center || placed foot yaw angle sig differs from current
+        // FindIkStepPosition raycasts hit
+        // Other foot fired before this one || enough reset time from last stride
+        // Wait till other foot's stride complete || this foot is overStreched and other foot somewhat below or past center
         bool conditions = ((strideDisPassed && significantDis) || maxAnglePassed) && hitStepPointValid && (otherFootFired || reseted) && (otherFootValidPosition || (overStreched && otherFootForward));
         if (steppingFwd && conditions)
         {

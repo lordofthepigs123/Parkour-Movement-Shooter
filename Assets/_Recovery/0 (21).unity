@@ -40243,41 +40243,14 @@ MonoBehaviour:
   friction_WallRun: 90
   speedMult_Prone: 1.2
   friction_Prone: 7
-  maxYTiltSpeed: 8
-  yTiltIntenistyRatio:
+  maxYTiltSpeed: 0
+  yTiltIntenisty:
     serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -0.99978817
-      value: -1.0052822
-      inSlope: 0.31811878
-      outSlope: 0.31811878
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.22878115
-    - serializedVersion: 3
-      time: -0.035378985
-      value: 0.24812917
-      inSlope: -0.13440515
-      outSlope: -0.13440515
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.070142895
-      outWeight: 0.09051739
-    - serializedVersion: 3
-      time: 1.0021973
-      value: 1
-      inSlope: 2.1338618
-      outSlope: 2.1338618
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.11899878
-      outWeight: 0
+    m_Curve: []
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxMultSpeed: 19
+  maxMultSpeed: 0
   degreeMax: 45
   legDirectionStrength: 2
   deflectionMult: 0.06
@@ -56920,7 +56893,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _minCenterDisplacement: 0.15
-  _maxReverseSpeed: 3
   _speedLimiterThreshold: 1.4
   _stepDirThresholdBuf: 0.25
   _smoothNormalMult: 6
